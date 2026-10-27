@@ -1,0 +1,16 @@
+# Compiled class files
+bin/
+*.class
+
+# Package files
+*.jar
+*.war
+*.zip
+*.tar.gz
+
+# IDE and OS files
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
