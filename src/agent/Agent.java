@@ -5,8 +5,7 @@ public abstract class Agent {
     private String name;
     private String currentLocation;
     private boolean available;
-    private boolean damaged;
-    public Agent(String id, String name, String currentLocation, boolean available, boolean damaged) {
+    public Agent(String id, String name, String currentLocation, boolean available) {
         if (id == null || id.trim().isEmpty()) {
          throw new IllegalArgumentException("Invalid ID");
        }
@@ -30,7 +29,6 @@ try {
         this.name = name;
         this.currentLocation = currentLocation;
         this.available = available;
-        this.damaged = damaged;
     }
     public String getID(){
         return id;
@@ -44,9 +42,6 @@ try {
     public boolean isAvailable(){
         return available;
     }
-    public boolean isDamaged(){
-        return damaged;
-    }
     public void setCurrentLocation(String currentLocation){
         if (currentLocation == null || currentLocation.trim().isEmpty()) {
             throw new IllegalArgumentException("Invalid location");
@@ -55,8 +50,5 @@ try {
     }
     public void setAvailability(boolean available){
         this.available=available;
-    }
-    public void setDamaged(boolean damaged){
-        this.damaged=damaged;
     }
 }

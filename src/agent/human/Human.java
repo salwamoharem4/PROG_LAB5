@@ -4,14 +4,15 @@ import java.util.ArrayList;
 
 import agent.Agent;
 
-public class Human extends Agent {
+public abstract class Human extends Agent {
     private String healthStatus;
     private ArrayList<String> skills;
     private int fatigueLevel;
 
-    public Human(String id, String name, String currentLocation, boolean available, boolean damaged,
+    public Human(String id, String name, String currentLocation, boolean available,
             String healthStatus, ArrayList<String> skills, int fatigueLevel) {
-        if (healthStatus == null || healthStatus.trim().isEmpty()) {
+        super(id, name, currentLocation, available);
+                if (healthStatus == null || healthStatus.trim().isEmpty()) {
             throw new IllegalArgumentException("Invalid health status");
         }
         if (skills == null || skills.isEmpty()) {
@@ -20,7 +21,6 @@ public class Human extends Agent {
         if (fatigueLevel < 0 || fatigueLevel > 100) {
             throw new IllegalArgumentException("Invalid fatigue level");
         }
-        super(id, name, currentLocation, available, damaged);
         this.healthStatus = healthStatus;
         this.skills = skills;
         this.fatigueLevel = fatigueLevel;
