@@ -5,7 +5,7 @@
 This repository is structured in accordance with the project submission specifications:
 
 ```text
-StudentID-Prog-II-Lab5/
+PROG_LAB5/
 ├── .gitignore
 ├── README.md
 │
