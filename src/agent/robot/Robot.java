@@ -37,4 +37,8 @@ public abstract class Robot extends Agent{
         }
         return true;
     }
+    @Override
+public boolean isInUsableCondition() {
+    return !isDamaged();
+}
 }
