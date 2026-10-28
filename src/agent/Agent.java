@@ -51,4 +51,8 @@ try {
     public void setAvailability(boolean available){
         this.available=available;
     }
+    public abstract boolean isInUsableCondition();
+    public boolean isAvailableForMission() {
+    return available && isInUsableCondition();
+}
 }
