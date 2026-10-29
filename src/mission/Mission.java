@@ -25,10 +25,15 @@ public interface Mission {
     int getRequiredBattery();
 
     /** True if the given team together covers every required capability. */
-    default boolean isCoveredBy(Collection<? extends Agent> team) {
-        Set<Capability> covered = EnumSet.noneOf(Capability.class);
+    //? extends Agent means the collection can contain objects 
+        // of Agent or any class implementing/extending its type.
+    default boolean isCoveredBy(Collection<? extends Agent> team) {/*default: A method with an implementation inside an 
+     interface. Classes implementing Mission automatically inherit this implementation unless they override it.*/
+        Set<Capability> covered = EnumSet.noneOf(Capability.class);//Create an empty Set
         for (Agent a : team) {
             covered.addAll(a.getCapabilities());
+            /*a.getCapabilities() gets that agent's capabilities.
+               addAll() adds all those capabilities to the covered Set.*/
         }
         return covered.containsAll(getRequiredCapabilities());
     }
