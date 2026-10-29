@@ -1,4 +1,5 @@
 package emergencies;
+import core.EmergencyType;
 
 public class emergency {
     private EmergencyStatus status = EmergencyStatus.PENDING;

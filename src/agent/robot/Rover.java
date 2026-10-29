@@ -1,49 +1,23 @@
 package agent.robot;
 
+import core.Capability;
+import core.Location;
+
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Set;
+
 public class Rover extends Robot {
 
-    private boolean cameraAvailable;
-    private boolean scientificEquipment;
+    private static final Set<Capability> CAPABILITIES =
+            Collections.unmodifiableSet(EnumSet.of(Capability.EXPLORE, Capability.RESCUE));
 
-    public Rover(String id, String name, String currentLocation,
-                 boolean available, boolean damaged, int batteryLevel,
-                 boolean cameraAvailable, boolean scientificEquipment) {
-
-        super(id, name, currentLocation, available, damaged, batteryLevel);
-
-        this.cameraAvailable = cameraAvailable;
-        this.scientificEquipment = scientificEquipment;
+    public Rover(int id, String name, Location location, int batteryLevel) {
+        super(id, name, location, batteryLevel);
     }
 
-    public boolean isCameraAvailable() {
-        return cameraAvailable;
-    }
-
-    public void setCameraAvailable(boolean cameraAvailable) {
-        this.cameraAvailable = cameraAvailable;
-    }
-
-    public boolean hasScientificEquipment() {
-        return scientificEquipment;
-    }
-
-    public void setScientificEquipment(boolean scientificEquipment) {
-        this.scientificEquipment = scientificEquipment;
-    }
-
-    public boolean canExplore(int requiredBattery) {
-        if (!isAvailable() || isDamaged()) {
-            return false;
-        }
-
-        if (!isEnoughBatteryLevel(requiredBattery)) {
-            return false;
-        }
-
-        if (!cameraAvailable || !scientificEquipment) {
-            return false;
-        }
-
-        return true;
+    @Override
+    public Set<Capability> getCapabilities() {
+        return CAPABILITIES;
     }
 }
