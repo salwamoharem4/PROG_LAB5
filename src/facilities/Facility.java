@@ -4,8 +4,9 @@ import resource.ResourceType;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Map;
+import core.Location;
 
-public abstract class Facility {
+public abstract class Facility implements Location{
     private String name;
     private String location;
     private int capacity;

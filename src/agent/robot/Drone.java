@@ -1,37 +1,23 @@
 package agent.robot;
 
+import core.Capability;
+import core.Location;
+
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Set;
+
 public class Drone extends Robot {
-    private boolean communicationAvailable;
-    private boolean cameraAvailable;
-    public Drone(String id, String name, String currentLocation, boolean available, boolean damaged, int batteryLevel,
-            boolean communicationAvailable, boolean cameraAvailable) {
-        super(id, name, currentLocation, available, damaged, batteryLevel);
-        this.communicationAvailable = communicationAvailable;
-        this.cameraAvailable = cameraAvailable;
+
+    private static final Set<Capability> CAPABILITIES =
+            Collections.unmodifiableSet(EnumSet.of(Capability.AERIAL_RECON));
+
+    public Drone(int id, String name, Location location, int batteryLevel) {
+        super(id, name, location, batteryLevel);
     }
-    public boolean isCommunicationAvailable() {
-        return communicationAvailable;
-    }
-    public void setCommunicationAvailable(boolean communicationAvailable) {
-        this.communicationAvailable = communicationAvailable;
-    }
-    public boolean isCameraAvailable() {
-        return cameraAvailable;
-    }
-    public void setCameraAvailable(boolean cameraAvailable) {
-        this.cameraAvailable = cameraAvailable;
-    }
-    
-    public boolean canPerformAerialMission(int requiredBattery) {
-        if (!isAvailable() || isDamaged()) {
-            return false;
-        }
-        if (!isEnoughBatteryLevel(requiredBattery)) {
-            return false;
-        }
-        if (!communicationAvailable || !cameraAvailable) {
-            return false;
-        }
-        return true;
+
+    @Override
+    public Set<Capability> getCapabilities() {
+        return CAPABILITIES;
     }
 }

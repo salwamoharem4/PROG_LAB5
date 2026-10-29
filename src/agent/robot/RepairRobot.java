@@ -1,32 +1,23 @@
 package agent.robot;
 
+import core.Capability;
+import core.Location;
+
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Set;
+
 public class RepairRobot extends Robot {
-    private boolean hasSpareParts;
 
-   
+    private static final Set<Capability> CAPABILITIES =
+            Collections.unmodifiableSet(EnumSet.of(Capability.REPAIR));
 
-    public RepairRobot(String id, String name, String currentLocation, boolean available, boolean damaged,
-            int batteryLevel, boolean hasSpareParts) {
-        super(id, name, currentLocation, available, damaged, batteryLevel);
-        this.hasSpareParts = hasSpareParts;
+    public RepairRobot(int id, String name, Location location, int batteryLevel) {
+        super(id, name, location, batteryLevel);
     }
 
-    public boolean isHasSpareParts() {
-        return hasSpareParts;
+    @Override
+    public Set<Capability> getCapabilities() {
+        return CAPABILITIES;
     }
-
-    public void setHasSpareParts(boolean hasSpareParts) {
-        this.hasSpareParts = hasSpareParts;
-    }
-
-    public boolean canRepair(int requiredBattery) {
-        if (!isAvailable() || isDamaged())
-            return false;
-        if (!isEnoughBatteryLevel(requiredBattery))
-            return false;
-        if (!hasSpareParts)
-            return false;
-        return true;
-    }
-    
 }
