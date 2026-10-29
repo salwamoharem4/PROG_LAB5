@@ -1,25 +1,38 @@
 
 package colony;
 
+// add humans and robots in an array in the colony so we can access or search them
+
+import agent.human.Human;
 import facilities.Facility;
 import resource.ResourceType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-//hna be manage el facailties bel functions bta3tha
+import agent.Agent;
+
+ //hna be manage el facilities bel functions bta3tha
 public class Colony {
 
-    private List<Facility> facilities;
+    private final List<Facility> facilities; // final to protect the pointer from being deleted by accident
+     private final List<Agent> agents= new ArrayList<>();    // acts like a database for all agents
+
 
     public Colony() {
         facilities = new ArrayList<>();
     }
 
     // Add a facility to the colony
+
     public void addFacility(Facility facility) {
         if (facility != null) {
             facilities.add(facility);
         }
+    }
+
+    public void addAgent(Agent agent){
+        agents.add(agent);
+
     }
 
     // Calculate total resources in operational facilities
