@@ -1,5 +1,7 @@
 package agent;
 
+import emergencies.EmergencyType;
+
 public abstract class Agent {
     private String id;
     private String name;
@@ -55,4 +57,5 @@ try {
     public boolean isAvailableForMission() {
     return available && isInUsableCondition();
 }
+    public abstract boolean canHandle(EmergencyType type);
 }

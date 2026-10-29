@@ -1,0 +1,7 @@
+package emergencies;
+
+public enum EmergencyStatus {
+    PENDING,
+    RESOLVED,
+    UNRESOLVED
+}

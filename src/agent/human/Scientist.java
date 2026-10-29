@@ -1,6 +1,8 @@
 
 package agent.human;
 
+import emergencies.EmergencyType;
+
 import java.util.ArrayList;
 
 public class Scientist extends Human {
@@ -37,4 +39,12 @@ public class Scientist extends Human {
     public boolean canPerformResearch(String requiredSkill) {
     return isAvailableForMission() && hasSkill(requiredSkill);
 }
+
+    @Override
+    public boolean canHandle(EmergencyType type) {
+
+        return false;
+    }
+
 }
+
