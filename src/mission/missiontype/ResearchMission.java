@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import agent.Agent;
 import core.Capability;
 import core.Location;
 import core.Skill;
