@@ -1,58 +1,40 @@
 package agent;
 
-public abstract class Agent {
-    private String id;
-    private String name;
-    private String currentLocation;
-    private boolean available;
-    public Agent(String id, String name, String currentLocation, boolean available) {
-        if (id == null || id.trim().isEmpty()) {
-         throw new IllegalArgumentException("Invalid ID");
-       }
+import core.Capability;
+import core.EmergencyType;
+import core.Location;
+import mission.Mission;
 
-try {
-    if (Integer.parseInt(id) <= 0) {//validate negative 
-        throw new IllegalArgumentException("Invalid ID");
-    }
-} catch (NumberFormatException e) { //validate string like abc 
-    throw new IllegalArgumentException("ID must be a number");
-}
+import java.util.Set;
 
-        if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Invalid name");
-        }
+public interface Agent {
 
-        if (currentLocation == null || currentLocation.trim().isEmpty()) {
-            throw new IllegalArgumentException("Invalid location");
-        }
-        this.id = id;
-        this.name = name;
-        this.currentLocation = currentLocation;
-        this.available = available;
-    }
-    public String getID(){
-        return id;
-    }
-    public String getName(){
-        return name;
-    }
-    public String getCurrentLocation(){
-        return currentLocation;
-    }
-    public boolean isAvailable(){
-        return available;
-    }
-    public void setCurrentLocation(String currentLocation){
-        if (currentLocation == null || currentLocation.trim().isEmpty()) {
-            throw new IllegalArgumentException("Invalid location");
-        }
-        this.currentLocation=currentLocation;
-    }
-    public void setAvailability(boolean available){
-        this.available=available;
-    }
-    public abstract boolean isInUsableCondition();
-    public boolean isAvailableForMission() {
-    return available && isInUsableCondition();
-}
+    int getId();
+
+    String getName();
+
+    Location getLocation();
+
+    // Move the agent to a location.
+    void moveTo(Location location);
+
+    // Check whether the agent is in usable condition.
+    boolean isUsable();
+
+    // Available means not assigned to an active mission and usable.
+    boolean isAvailable();
+
+    Set<Capability> getCapabilities();//is set to prevent duplicate capabilities.
+
+    // Check whether the agent can perform a mission.
+    boolean canPerform(Mission mission);
+
+    // Check whether the agent can handle an emergency.
+    boolean canHandle(EmergencyType type);
+
+    // Assign the agent to a mission.
+    void assign();
+
+    // Release the agent when the mission ends.
+    void release();
 }

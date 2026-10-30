@@ -1,31 +1,31 @@
 package emergencies;
-import facilities.Facility;
+import core.EmergencyType;
 
 public class emergency {
-    private emergencyStatus status = emergencyStatus.PENDING;
-    private emergencyType type;
+    private EmergencyStatus status = EmergencyStatus.PENDING;
+    private EmergencyType type;
     private String unresolvedReason="";
 
-    public emergency(emergencyStatus status, emergencyType type, String unresolvedReason) {
+    public emergency(EmergencyStatus status, EmergencyType type, String unresolvedReason) {
         this.status = status;
         this.type = type;
         this.unresolvedReason = unresolvedReason;
     }
 
 
-    public emergencyStatus getStatus() {
+    public EmergencyStatus getStatus() {
         return status;
     }
 
-    public void setStatus(emergencyStatus status) {
+    public void setStatus(EmergencyStatus status) {
         this.status = status;
     }
 
-    public emergencyType getType() {
+    public EmergencyType getType() {
         return type;
     }
 
-    public void setType(emergencyType type) {
+    public void setType(EmergencyType type) {
         this.type = type;
     }
 

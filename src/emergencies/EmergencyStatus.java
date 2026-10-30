@@ -1,6 +1,6 @@
 package emergencies;
 
-public enum emergencyStatus {
+public enum EmergencyStatus {
     PENDING,
     RESOLVED,
     UNRESOLVED
