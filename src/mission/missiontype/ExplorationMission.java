@@ -71,34 +71,4 @@ public class ExplorationMission extends BaseMission {
              Surface.INSTANCE,
              new ArrayList<>());
     }
-    // Checks whether all required equipment is operational.
-    public boolean hasOperationalRequiredEquipment() {
-
-        for (Equipment equipment : getRequiredEquipment()) {
-
-            if (equipment == null || !equipment.isOperational()) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    // Returns a clear explanation if equipment is not operational.
-    public String getEquipmentFailureReason() {
-
-        for (Equipment equipment : getRequiredEquipment()) {
-
-            if (equipment == null) {
-                return "Required equipment is missing.";
-            }
-
-            if (!equipment.isOperational()) {
-                return "Required equipment is not operational: "
-                        + equipment.getName();
-            }
-        }
-
-        return null;
-    }
 }

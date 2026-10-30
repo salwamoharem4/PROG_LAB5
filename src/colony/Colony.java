@@ -149,6 +149,12 @@ public class Colony {
         return true;
     }
 
+    // Reject a mission and register it so its failure is tracked.
+    private boolean rejectMission(BaseMission mission, String reason) {
+        mission.fail(reason);
+        missionExecutor.addMission(mission);
+        return false;
+    }
     // Check whether all selected agents belong to this colony
     // and are available and capable of performing the mission.
     private String validateAgents(BaseMission mission, List<Agent> selectedAgents) {
@@ -208,29 +214,28 @@ public class Colony {
                 && (activeNormalMission.getStatus() == MissionStatus.ASSIGNED
                 || activeNormalMission.getStatus() == MissionStatus.IN_PROGRESS)) {
 
-            mission.fail("Another normal mission is already active.");
-            return false;
+            return rejectMission(
+                    mission,
+                    "Another normal mission is already active.");
         }
 
         // Validate selected agents.
         String agentError = validateAgents(mission, selectedAgents);
 
         if (agentError != null) {
-            mission.fail(agentError);
-            return false;
+            return rejectMission(mission, agentError);
         }
 
         // Validate equipment.
         if (!hasRequiredEquipment(mission)) {
-            mission.fail(
+            return rejectMission(
+                    mission,
                     "Required equipment is missing or not operational.");
-            return false;
         }
 
         // Validate resources before consuming anything.
         if (!hasEnoughResources(mission.getRequiredResources())) {
-            mission.fail("Insufficient colony resources.");
-            return false;
+            return rejectMission(mission, "Insufficient colony resources.");
         }
 
         // Assign all selected agents.
@@ -241,9 +246,8 @@ public class Colony {
 
             // Check that the mission is fully covered.
             if (mission.getStatus() != MissionStatus.ASSIGNED) {
-                mission.fail(
-                        "Selected agents do not satisfy mission requirements.");
-                return false;
+                return rejectMission(
+                        mission, "Selected agents do not satisfy mission requirements.");
             }
 
             // Consume resources only after validation and assignment.
@@ -270,7 +274,8 @@ public class Colony {
             if (mission.getStatus() != MissionStatus.COMPLETED
                     && mission.getStatus() != MissionStatus.FAILED
                     && mission.getStatus() != MissionStatus.CANCELLED) {
-                mission.fail("Mission assignment failed: " + ex.getMessage());
+                return rejectMission(
+                        mission, "Mission assignment failed: " + ex.getMessage());
             }
 
             return false;

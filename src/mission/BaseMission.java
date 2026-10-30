@@ -102,7 +102,6 @@ public abstract class BaseMission implements Mission {
     public MissionType getType() {
         return type;
     }
-    @Override
     public MissionStatus getStatus() {
         return status;
     }
@@ -115,7 +114,6 @@ public abstract class BaseMission implements Mission {
     public int getElapsedTime() {
         return elapsedTime;
     }
-    @Override
     public String getFailureReason() {
         return failureReason;
     }

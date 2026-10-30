@@ -4,23 +4,23 @@ package agent;
 import core.EmergencyType;
 import core.Location;
 import mission.Mission;
-import mission.missiontype.ExplorationMission;
-import mission.missiontype.RepairMission;
-import mission.missiontype.RescueMission;
-import mission.missiontype.ResearchMission;
 
 import java.util.Collections;
 
 // Contains the common fields and methods for all agents.
 public abstract class BaseAgent implements Agent {
-/*In this design I used protected cuz to let only subclasses of BaseAgent access the required info,
-since public let any class or subclass acess the required info,I used final to prevent Human or Robot 
-from overriding the method and accidentally changing the availability rule */
+
+    /*
+     * In this design I used protected for the constructor to let only
+     * subclasses of BaseAgent access it.
+     * I used final to prevent Human or Robot from overriding the method
+     * and accidentally changing the availability rule.
+     */
+
     private final int id;
     private final String name;
     private Location location;
     private boolean available = true;
-
 
     protected BaseAgent(int id, String name, Location location) {
         if (id <= 0) {
@@ -81,7 +81,7 @@ from overriding the method and accidentally changing the availability rule */
     }
 
     // Checks if the agent can perform the mission.
-    @Override//final prevents something from being changed or overridden
+    @Override
     public final boolean canPerform(Mission mission) {
         if (mission == null || !isAvailable()) {
             return false;
@@ -99,6 +99,7 @@ from overriding the method and accidentally changing the availability rule */
 
     // Subclasses can add extra conditions for their missions.
     protected boolean meetsMissionConditions(Mission mission) {
+
         // Check required scientific skills.
         if (getSkills() == null ||
                 !getSkills().containsAll(mission.getRequiredSkills())) {
@@ -110,42 +111,9 @@ from overriding the method and accidentally changing the availability rule */
             return false;
         }
 
-        // Check exploration equipment.
-        if (mission instanceof ExplorationMission) {
-
-            ExplorationMission exploration =
-                    (ExplorationMission) mission;
-
-            if (!exploration.hasOperationalRequiredEquipment()) {
-                return false;
-            }
-        }
-    if (mission instanceof RepairMission) {
-
-        RepairMission repair = (RepairMission) mission;
-
-        if (!repair.hasOperationalRequiredEquipment()) {
-            return false;
-        }
-    }
-        if (mission instanceof RescueMission) {
-
-            RescueMission rescue = (RescueMission) mission;
-
-            if (!rescue.hasOperationalRequiredEquipment()) {
-                return false;
-            }
-        }
-        if (mission instanceof ResearchMission) {
-
-            ResearchMission research = (ResearchMission) mission;
-
-            if (!research.hasOperationalRequiredEquipment()) {
-                return false;
-            }
-        }
         return true;
     }
+
     @Override
     public boolean canHandle(EmergencyType type) {
         return type != null
@@ -155,25 +123,24 @@ from overriding the method and accidentally changing the availability rule */
     }
 
     @Override
-    //Prints the Info of the agent 
+    // Prints the information of the agent.
     public String toString() {
-        return getClass().getSimpleName() + "[" + id + ", " + name + ", at " + location.getName() + "]";
+        return getClass().getSimpleName() + "[" + id + ", " + name
+                + ", at " + location.getName() + "]";
     }
 
     @Override
-    public void setAvailability(boolean b){
-
-        this.available=b;
-
+    public void setAvailability(boolean b) {
+        this.available = b;
     }
 
     @Override
     public boolean isHuman() {
-        return false; // By default, false
-    }
-    @Override
-    public boolean isRobot() {
-        return false; // By default, false
+        return false; // By default, false.
     }
 
+    @Override
+    public boolean isRobot() {
+        return false; // By default, false.
+    }
 }
