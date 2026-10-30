@@ -1,17 +1,28 @@
 package emergencies;
 import core.EmergencyType;
 
-public class emergency {
-    private EmergencyStatus status = EmergencyStatus.PENDING;
-    private EmergencyType type;
-    private String unresolvedReason="";
+import agent.Agent;
 
-    public emergency(EmergencyStatus status, EmergencyType type, String unresolvedReason) {
-        this.status = status;
+import java.util.ArrayList;
+import java.util.List;
+
+public abstract class emergency {
+
+    private final EmergencyType type;
+    private EmergencyStatus status = EmergencyStatus.PENDING;
+    private String unresolvedReason = "";
+
+    private final List <Agent> dispatchedResponders = new ArrayList<>();
+
+
+
+    public emergency(EmergencyType type) {
         this.type = type;
-        this.unresolvedReason = unresolvedReason;
     }
 
+    public EmergencyType getType() {
+        return type;
+    }
 
     public EmergencyStatus getStatus() {
         return status;
@@ -21,14 +32,6 @@ public class emergency {
         this.status = status;
     }
 
-    public EmergencyType getType() {
-        return type;
-    }
-
-    public void setType(EmergencyType type) {
-        this.type = type;
-    }
-
     public String getUnresolvedReason() {
         return unresolvedReason;
     }
@@ -36,4 +39,31 @@ public class emergency {
     public void setUnresolvedReason(String unresolvedReason) {
         this.unresolvedReason = unresolvedReason;
     }
+    public void dispatchResponder(Agent agent){
+        this.dispatchedResponders.add(agent);
+        agent.setAvailability(false);
+
+    }
+
+    public void releaseResponders(){
+
+        for (Agent agent : dispatchedResponders){
+            agent.setAvailability(true);
+        }
+
+        dispatchedResponders.clear();
+    }
+    public void markResolved(){
+        this.status=EmergencyStatus.RESOLVED;
+        releaseResponders();
+    }
+
+    public void markUnresolved(String Reason){
+        this.status=EmergencyStatus.UNRESOLVED;
+        this.unresolvedReason = Reason;
+        releaseResponders();
+
+    }
+
+    public abstract boolean resolve(List<Agent> candidateResponders);
 }

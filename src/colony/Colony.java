@@ -30,7 +30,7 @@ public class Colony {
         }
     }
 
-    public void addAgent(Agent agent){
+    public void addAgent(Agent agent){  // in simulation or main file don't forget to add in the colony
         agents.add(agent);
 
     }

@@ -106,4 +106,11 @@ from overriding the method and accidentally changing the availability rule */
     public String toString() {
         return getClass().getSimpleName() + "[" + id + ", " + name + ", at " + location.getName() + "]";
     }
+
+    @Override
+    public void setAvailability(boolean b){
+
+
+    }
+
 }
