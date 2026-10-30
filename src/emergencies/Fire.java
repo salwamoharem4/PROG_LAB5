@@ -1,24 +1,37 @@
 package emergencies;
 
-import agent.Agent;
 import core.EmergencyType;
+import facilities.Habitat;
+import agent.BaseAgent;
 import java.util.List;
 
-public class Fire extends emergency {
+// DON'T FORGET TO ADD RELEASE AFTER TIME DURATION
+// DON'T FORGET TO ADD RELEASE AFTER TIME DURATION
+// DON'T FORGET TO ADD RELEASE AFTER TIME DURATION
 
-    public Fire() {
-        super(EmergencyType.FIRE); // Done! Parent handles the rest
+public class Fire extends emergency {
+    private Habitat affectedHabitat;
+
+
+    public Fire(EmergencyType type, Habitat affectedHabitat) {
+        super(type,affectedHabitat);
+        this.affectedHabitat=affectedHabitat;
+        this.affectedHabitat.setOperationalStatus(false);
+        System.out.println( "FIRE OCCURED IN  : " + affectedHabitat.getName() +"!!");
+    }
+    @Override
+    public boolean resolve(List<BaseAgent> candidateResponders) {
+            if(!dispatchTeam(candidateResponders)){
+                return false;
+            }
+
+            markResolved();
+        System.out.println("FIRE HAS BEEN PUT OUT");
+
+        return true;
     }
 
-    @Override
-    public boolean resolve(List<Agent> candidateResponders) {
-
-        for (Agent agent : candidateResponders) {
-            if (agent.canHandle(getType())) {
-
-            }
-        }
-        return false;
-
+    public Habitat getAffectedHabitat() {
+        return affectedHabitat;
     }
 }

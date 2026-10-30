@@ -1,27 +1,35 @@
 package emergencies;
 import core.EmergencyType;
 
-import agent.Agent;
+import agent.BaseAgent;
+import core.Location;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public abstract class emergency {
 
+    private Location Emergencylocation;
     private final EmergencyType type;
     private EmergencyStatus status = EmergencyStatus.PENDING;
     private String unresolvedReason = "";
 
-    private final List <Agent> dispatchedResponders = new ArrayList<>();
+    private final List <BaseAgent> dispatchedResponders = new ArrayList<>();
 
 
 
-    public emergency(EmergencyType type) {
+    public emergency(EmergencyType type , Location EmergencyLocation) {
         this.type = type;
+        this.Emergencylocation=EmergencyLocation;
     }
 
     public EmergencyType getType() {
         return type;
+    }
+
+    public Location getEmergencylocation() {
+        return Emergencylocation;
     }
 
     public EmergencyStatus getStatus() {
@@ -39,31 +47,86 @@ public abstract class emergency {
     public void setUnresolvedReason(String unresolvedReason) {
         this.unresolvedReason = unresolvedReason;
     }
-    public void dispatchResponder(Agent agent){
+
+    public void dispatchResponder(BaseAgent agent){
+
+
         this.dispatchedResponders.add(agent);
+        agent.moveTo(getEmergencylocation());
         agent.setAvailability(false);
 
+    }
+    public List<BaseAgent> getDispatchedResponders() {
+        return Collections.unmodifiableList(dispatchedResponders);
     }
 
     public void releaseResponders(){
 
-        for (Agent agent : dispatchedResponders){
+        for (BaseAgent agent : dispatchedResponders){
             agent.setAvailability(true);
         }
 
         dispatchedResponders.clear();
     }
     public void markResolved(){
-        this.status=EmergencyStatus.RESOLVED;
+        setStatus(EmergencyStatus.RESOLVED);
         releaseResponders();
     }
 
     public void markUnresolved(String Reason){
-        this.status=EmergencyStatus.UNRESOLVED;
-        this.unresolvedReason = Reason;
+        setStatus(EmergencyStatus.UNRESOLVED);
+        setUnresolvedReason(Reason);
         releaseResponders();
 
     }
 
-    public abstract boolean resolve(List<Agent> candidateResponders);
+
+    protected boolean dispatchTeam(List<BaseAgent> candidateResponders){
+    BaseAgent human = null;
+    BaseAgent robot = null;
+
+    for(BaseAgent agent : candidateResponders){
+        if(agent.isAvailable() && agent.canHandle(getType())){
+            if (agent.isHuman() && human==null){
+                human=agent;
+            }else if( agent.isRobot() && robot== null){
+                robot = agent;
+            }
+
+        }
+        if( human!=null && robot != null){
+            break;
+        }
+
+
+    }
+
+        if (human == null || robot == null) {
+
+            if (human == null && robot == null) {
+
+                markUnresolved("No available human or robotic responders with capability: " + getType().getRequiredCapability());
+
+            } else if (human == null) {
+
+                markUnresolved("No available human responder with capability: " + getType().getRequiredCapability());
+
+            } else {
+
+                markUnresolved("No available robotic responder with capability: " + getType().getRequiredCapability());
+            }
+
+            return false;
+
+        }else {
+
+        dispatchResponder(human);
+        dispatchResponder(robot);
+        return true;
+
+
+    }
+
+    }
+    public abstract boolean resolve(List<BaseAgent> candidateResponders);
 }

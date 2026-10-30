@@ -9,7 +9,7 @@ import java.util.Collections;
 
 // Contains the common fields and methods for all agents.
 public abstract class BaseAgent implements Agent {
-/*In this design i used protected cuz to let only subclasses of BaseAgent access the required info,
+/*In this design I used protected cuz to let only subclasses of BaseAgent access the required info,
 since public let any class or subclass acess the required info,I used final to prevent Human or Robot 
 from overriding the method and accidentally changing the availability rule */
     private final int id;
@@ -108,7 +108,7 @@ from overriding the method and accidentally changing the availability rule */
         return getClass().getSimpleName() + "[" + id + ", " + name + ", at " + location.getName() + "]";
     }
 
-    @Override
+
     public void setAvailability(boolean b){
 
         this.available=b;

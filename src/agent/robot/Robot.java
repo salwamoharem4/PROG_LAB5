@@ -81,4 +81,10 @@ public void drainBattery(int amount) {
     protected boolean meetsMissionConditions(Mission mission) {
         return isEnoughBatteryLevel(mission.getRequiredBattery());
     }
+
+    public boolean isRobot(){
+
+        return true;
+    }
+
 }

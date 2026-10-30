@@ -117,4 +117,9 @@ public void rest(int amount) {
     protected boolean meetsMissionConditions(Mission mission) {
         return skills.containsAll(mission.getRequiredSkills());
     }
+
+    public boolean isHuman(){
+        return true;
+
+    }
 }
