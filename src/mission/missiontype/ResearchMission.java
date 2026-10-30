@@ -85,7 +85,6 @@ public class ResearchMission extends BaseMission {
                         + equipment.getName();
             }
         }
-
         return null;
     }
 }

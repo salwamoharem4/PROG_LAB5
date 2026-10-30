@@ -20,8 +20,6 @@ import resource.ResourceType;
 // Represents a rescue mission to locate and recover a stranded entity.
 // Requires RESCUE capability (e.g. Rover), available personnel, and sufficient vehicle battery.
 public class RescueMission extends BaseMission {
-
-    // Rescue missions require RESCUE capability.
     private static final Set<Capability> DEFAULT_CAPABILITIES =
             Collections.unmodifiableSet(EnumSet.of(Capability.RESCUE));
 
@@ -31,32 +29,32 @@ public class RescueMission extends BaseMission {
                          Map<ResourceType, Integer> requiredResources,
                          Location strandedLocation, List<Equipment> requiredEquipment) {
         super(id,
-              name,
-              MissionType.RESCUE,
-              MissionStatus.PENDING,
-              duration,
-              0,
-              null,
-              DEFAULT_CAPABILITIES,
-              requiredSkills != null ? requiredSkills : EnumSet.noneOf(Skill.class),
-              requiredBattery,
-              requiredResources != null ? requiredResources : new EnumMap<>(ResourceType.class),
-              strandedLocation != null ? strandedLocation : Surface.INSTANCE,
-              requiredEquipment != null ? requiredEquipment : new ArrayList<>(),
-              new ArrayList<>());
+                name,
+                MissionType.RESCUE,
+                MissionStatus.PENDING,
+                duration,
+                0,
+                null,
+                DEFAULT_CAPABILITIES,
+                requiredSkills != null ? requiredSkills : EnumSet.noneOf(Skill.class),
+                requiredBattery,
+                requiredResources != null ? requiredResources : new EnumMap<>(ResourceType.class),
+                strandedLocation != null ? strandedLocation : Surface.INSTANCE,
+                requiredEquipment != null ? requiredEquipment : new ArrayList<>(),
+                new ArrayList<>());
     }
 
     // Convenience constructor for surface rescue missions.
     public RescueMission(int id, String name, int duration,
                          int requiredBattery, Location strandedLocation) {
         this(id,
-             name,
-             duration,
-             EnumSet.noneOf(Skill.class),
-             requiredBattery,
-             new EnumMap<>(ResourceType.class),
-             strandedLocation != null ? strandedLocation : Surface.INSTANCE,
-             new ArrayList<>());
+                name,
+                duration,
+                EnumSet.noneOf(Skill.class),
+                requiredBattery,
+                new EnumMap<>(ResourceType.class),
+                strandedLocation != null ? strandedLocation : Surface.INSTANCE,
+                new ArrayList<>());
     }
     // Checks whether all required equipment is operational.
     public boolean hasOperationalRequiredEquipment() {
@@ -70,7 +68,6 @@ public class RescueMission extends BaseMission {
 
         return true;
     }
-
     // Returns the reason if required equipment is unavailable.
     public String getEquipmentFailureReason() {
 
@@ -85,7 +82,6 @@ public class RescueMission extends BaseMission {
                         + equipment.getName();
             }
         }
-
         return null;
     }
 }

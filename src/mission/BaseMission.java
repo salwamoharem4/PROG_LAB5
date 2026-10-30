@@ -17,7 +17,7 @@ import mission.missiontype.MissionType;
 import resource.ResourceType;
 
 public abstract class BaseMission implements Mission {
-   private final int id;
+    private final int id;
     private final String name;
     private final MissionType type;
     private MissionStatus status;
@@ -33,13 +33,13 @@ public abstract class BaseMission implements Mission {
     private final List<Agent> assignedAgents;
 
     public BaseMission(int id, String name, MissionType type, MissionStatus status, int duration, int elapsedTime,
-            String failureReason, Set<Capability> requiredCapabilities, Set<Skill> requiredSkills, int requiredBattery,
-            Map<ResourceType, Integer> requiredResources, Location targetLocation, List<Equipment> requiredEquipment,
-            List<Agent> assignedAgents) {
-        if (id<0){
+                       String failureReason, Set<Capability> requiredCapabilities, Set<Skill> requiredSkills, int requiredBattery,
+                       Map<ResourceType, Integer> requiredResources, Location targetLocation, List<Equipment> requiredEquipment,
+                       List<Agent> assignedAgents) {
+        if (id < 0) {
             throw new IllegalArgumentException("Invalid ID");
-        }      
-        if (name==null||name.trim().isEmpty()){
+        }
+        if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Invalid Name");
         }
         if (requiredCapabilities == null || requiredCapabilities.contains(null)
@@ -54,7 +54,7 @@ public abstract class BaseMission implements Mission {
             if (amount == null || amount < 0) {
                 throw new IllegalArgumentException("Invalid resource amount");
             }
-        } 
+        }
         if (requiredBattery < 0 || requiredBattery > 100) {
             throw new IllegalArgumentException("Invalid battery requirement");
         }
@@ -76,16 +76,16 @@ public abstract class BaseMission implements Mission {
         this.id = id;
         this.name = name;
         this.type = type;
-        this.status = MissionStatus.PENDING;
+        this.status = (status == null) ? MissionStatus.PENDING : status;
         this.duration = duration;
-        this.elapsedTime = 0;
-        this.failureReason = null;
-        this.requiredCapabilities = requiredCapabilities.isEmpty()? EnumSet.noneOf(Capability.class): EnumSet.copyOf(requiredCapabilities);
+        this.elapsedTime = elapsedTime;
+        this.failureReason = failureReason;
+        this.requiredCapabilities = requiredCapabilities.isEmpty() ? EnumSet.noneOf(Capability.class) : EnumSet.copyOf(requiredCapabilities);
         this.requiredSkills = requiredSkills.isEmpty() ? EnumSet.noneOf(Skill.class) : EnumSet.copyOf(requiredSkills);
         this.requiredBattery = requiredBattery;
         this.requiredResources = Collections.unmodifiableMap(new java.util.EnumMap<>(requiredResources));
         this.targetLocation = targetLocation;
-        this.requiredEquipment =new ArrayList<>(requiredEquipment);
+        this.requiredEquipment = new ArrayList<>(requiredEquipment);
         this.assignedAgents = new ArrayList<>();
 
     }
@@ -102,7 +102,7 @@ public abstract class BaseMission implements Mission {
     public MissionType getType() {
         return type;
     }
-
+    @Override
     public MissionStatus getStatus() {
         return status;
     }
@@ -111,10 +111,11 @@ public abstract class BaseMission implements Mission {
         return duration;
     }
 
+
     public int getElapsedTime() {
         return elapsedTime;
     }
-
+    @Override
     public String getFailureReason() {
         return failureReason;
     }
@@ -150,20 +151,20 @@ public abstract class BaseMission implements Mission {
         return Collections.unmodifiableList(assignedAgents);
     }//this method chexks wether the agent canperform or not assigned to mission and then assign them
 
-    public void assignAgent(Agent agent){
-        if(agent==null){
-             throw new IllegalArgumentException("Agent cannot be null");
+    public void assignAgent(Agent agent) {
+        if (agent == null) {
+            throw new IllegalArgumentException("Agent cannot be null");
         }
-        if(status!=MissionStatus.PENDING && status !=MissionStatus.ASSIGNED){
+        if (status != MissionStatus.PENDING && status != MissionStatus.ASSIGNED) {
             throw new IllegalArgumentException("can not assign agent to this mission");
         }
-        if(assignedAgents.contains(agent)){
+        if (assignedAgents.contains(agent)) {
             throw new IllegalArgumentException("Agent is already assigned");
         }
-        if(!agent.isUsable() || !agent.isAvailable()){
+        if (!agent.isUsable() || !agent.isAvailable()) {
             throw new IllegalArgumentException("Agent is not available");
         }
-        if(!agent.canPerform(this)){
+        if (!agent.canPerform(this)) {
             throw new IllegalArgumentException("Agent can not perform");
         }
         agent.assign();
@@ -176,7 +177,7 @@ public abstract class BaseMission implements Mission {
     }
     // Remove an agent from the mission.
     public void removeAgent(Agent agent) {
-        if(status!=MissionStatus.PENDING && status !=MissionStatus.ASSIGNED){
+        if (status != MissionStatus.PENDING && status != MissionStatus.ASSIGNED) {
             throw new IllegalArgumentException("can not remove agent from this mission");
         }
         if (agent == null || !assignedAgents.contains(agent)) {
@@ -188,11 +189,11 @@ public abstract class BaseMission implements Mission {
 
         if (isCoveredBy(assignedAgents)) {
             status = MissionStatus.ASSIGNED;
-        }
-        else{
+        } else {
             status = MissionStatus.PENDING;
         }
     }
+
     // Start the mission.
     public void start() {
         if (status != MissionStatus.ASSIGNED || assignedAgents.isEmpty()
@@ -229,7 +230,7 @@ public abstract class BaseMission implements Mission {
         releaseAllAgents();
     }
 
-     // Release all assigned agents.
+    // Release all assigned agents.
     private void releaseAllAgents() {
         for (Agent agent : assignedAgents) {
             agent.release();
@@ -237,7 +238,8 @@ public abstract class BaseMission implements Mission {
 
         assignedAgents.clear();
     }
-     // Mark the mission as failed.
+
+    // Mark the mission as failed.
     public void fail(String reason) {
         if (reason == null || reason.trim().isEmpty()) {
             throw new IllegalArgumentException("Failure reason is required");

@@ -30,32 +30,32 @@ public class RepairMission extends BaseMission {
                          Map<ResourceType, Integer> requiredResources,
                          Location targetLocation, List<Equipment> requiredEquipment) {
         super(id,
-              name,
-              MissionType.REPAIR,
-              MissionStatus.PENDING,
-              duration,
-              0,
-              null,
-              DEFAULT_CAPABILITIES,
-              requiredSkills != null ? requiredSkills : EnumSet.noneOf(Skill.class),
-              requiredBattery,
-              requiredResources != null ? requiredResources : new EnumMap<>(ResourceType.class),
-              targetLocation,
-              requiredEquipment != null ? requiredEquipment : new ArrayList<>(),
-              new ArrayList<>());
+                name,
+                MissionType.REPAIR,
+                MissionStatus.PENDING,
+                duration,
+                0,
+                null,
+                DEFAULT_CAPABILITIES,
+                requiredSkills != null ? requiredSkills : EnumSet.noneOf(Skill.class),
+                requiredBattery,
+                requiredResources != null ? requiredResources : new EnumMap<>(ResourceType.class),
+                targetLocation,
+                requiredEquipment != null ? requiredEquipment : new ArrayList<>(),
+                new ArrayList<>());
     }
 
     // Convenience constructor specifying target location and spare parts needed.
     public RepairMission(int id, String name, int duration,
                          Location targetLocation, int sparePartsNeeded, int requiredBattery) {
         this(id,
-             name,
-             duration,
-             EnumSet.noneOf(Skill.class),
-             requiredBattery,
-             createSparePartsMap(sparePartsNeeded),
-             targetLocation,
-             new ArrayList<>());
+                name,
+                duration,
+                EnumSet.noneOf(Skill.class),
+                requiredBattery,
+                createSparePartsMap(sparePartsNeeded),
+                targetLocation,
+                new ArrayList<>());
     }
 
     // Helper method to create a resource map with spare parts.
@@ -66,34 +66,23 @@ public class RepairMission extends BaseMission {
         }
         return resources;
     }
+
     // Checks whether all required equipment is operational.
     public boolean hasOperationalRequiredEquipment() {
-
-        for (Equipment equipment : getRequiredEquipment()) {
-
-            if (equipment == null || !equipment.isOperational()) {
-                return false;
-            }
-        }
-
-        return true;
+        return getEquipmentFailureReason() == null;
     }
 
     // Returns a clear equipment failure reason.
     public String getEquipmentFailureReason() {
-
         for (Equipment equipment : getRequiredEquipment()) {
-
             if (equipment == null) {
                 return "Required repair equipment is missing.";
             }
 
             if (!equipment.isOperational()) {
-                return "Required repair equipment is not operational: "
-                        + equipment.getName();
+                return "Required repair equipment is not operational: " + equipment.getName();
             }
         }
-
         return null;
     }
 }
