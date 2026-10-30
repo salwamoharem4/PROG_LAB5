@@ -15,7 +15,8 @@ from overriding the method and accidentally changing the availability rule */
     private final int id;
     private final String name;
     private Location location;
-    private boolean onMission = false;
+    private boolean available = true;
+
 
     protected BaseAgent(int id, String name, Location location) {
         if (id <= 0) {
@@ -59,7 +60,7 @@ from overriding the method and accidentally changing the availability rule */
     // The agent is available if it is not on a mission and is usable.
     @Override
     public final boolean isAvailable() {
-        return !onMission && isUsable();
+        return available && isUsable();
     }
 
     @Override
@@ -67,12 +68,12 @@ from overriding the method and accidentally changing the availability rule */
         if (!isAvailable()) {
             throw new IllegalStateException(name + " is not available");
         }
-        onMission = true;
+        available = false;
     }
 
     @Override
     public void release() {
-        onMission = false;
+        available = true;
     }
 
     // Checks if the agent can perform the mission.
@@ -110,6 +111,7 @@ from overriding the method and accidentally changing the availability rule */
     @Override
     public void setAvailability(boolean b){
 
+        this.available=b;
 
     }
 

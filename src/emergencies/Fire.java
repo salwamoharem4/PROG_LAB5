@@ -1,7 +1,7 @@
 package emergencies;
 
 import agent.Agent;
-
+import core.EmergencyType;
 import java.util.List;
 
 public class Fire extends emergency {
