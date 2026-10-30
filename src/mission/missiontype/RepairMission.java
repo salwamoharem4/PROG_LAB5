@@ -66,4 +66,34 @@ public class RepairMission extends BaseMission {
         }
         return resources;
     }
+    // Checks whether all required equipment is operational.
+    public boolean hasOperationalRequiredEquipment() {
+
+        for (Equipment equipment : getRequiredEquipment()) {
+
+            if (equipment == null || !equipment.isOperational()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // Returns a clear equipment failure reason.
+    public String getEquipmentFailureReason() {
+
+        for (Equipment equipment : getRequiredEquipment()) {
+
+            if (equipment == null) {
+                return "Required repair equipment is missing.";
+            }
+
+            if (!equipment.isOperational()) {
+                return "Required repair equipment is not operational: "
+                        + equipment.getName();
+            }
+        }
+
+        return null;
+    }
 }

@@ -58,4 +58,34 @@ public class RescueMission extends BaseMission {
              strandedLocation != null ? strandedLocation : Surface.INSTANCE,
              new ArrayList<>());
     }
+    // Checks whether all required equipment is operational.
+    public boolean hasOperationalRequiredEquipment() {
+
+        for (Equipment equipment : getRequiredEquipment()) {
+
+            if (equipment == null || !equipment.isOperational()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // Returns the reason if required equipment is unavailable.
+    public String getEquipmentFailureReason() {
+
+        for (Equipment equipment : getRequiredEquipment()) {
+
+            if (equipment == null) {
+                return "Required rescue equipment is missing.";
+            }
+
+            if (!equipment.isOperational()) {
+                return "Required rescue equipment is not operational: "
+                        + equipment.getName();
+            }
+        }
+
+        return null;
+    }
 }

@@ -58,4 +58,34 @@ public class ResearchMission extends BaseMission {
              laboratoryLocation,
              equipment != null ? equipment : new ArrayList<>());
     }
+    // Checks whether all required scientific equipment is operational.
+    public boolean hasOperationalRequiredEquipment() {
+
+        for (Equipment equipment : getRequiredEquipment()) {
+
+            if (equipment == null || !equipment.isOperational()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // Returns a clear explanation if equipment is unavailable.
+    public String getEquipmentFailureReason() {
+
+        for (Equipment equipment : getRequiredEquipment()) {
+
+            if (equipment == null) {
+                return "Required scientific equipment is missing.";
+            }
+
+            if (!equipment.isOperational()) {
+                return "Scientific equipment is not operational: "
+                        + equipment.getName();
+            }
+        }
+
+        return null;
+    }
 }

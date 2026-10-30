@@ -13,7 +13,7 @@ public class Drone extends Robot {
             Collections.unmodifiableSet(EnumSet.of(Capability.AERIAL_RECON));
 
     public Drone(int id, String name, Location location, int batteryLevel) {
-        super(id, name, location, batteryLevel);
+        super(id, name, location, Collections.emptySet(), batteryLevel);
     }
 
     @Override
