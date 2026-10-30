@@ -1,3 +1,4 @@
+
 package colony;
 
 import facilities.Facility;
@@ -12,7 +13,7 @@ import java.util.Map;
 import agent.Agent;
 import java.util.Collections;
 
-//hna be manage el facilities bel functions bta3tha
+// hna be manage el facilities bel functions bta3tha
 public class Colony {
 
     private final List<Facility> facilities;
@@ -31,13 +32,15 @@ public class Colony {
 
     // Add a facility to the colony
     public void addFacility(Facility facility) {
-        if (facility != null) {
+        if (facility != null && !facilities.contains(facility)) {
             facilities.add(facility);
         }
     }
 
     public void addAgent(Agent agent) {
-        agents.add(agent);
+        if (agent != null && !agents.contains(agent)) {
+            agents.add(agent);
+        }
     }
 
     public List<Facility> getFacilities() {
@@ -53,15 +56,17 @@ public class Colony {
         if (type == null) return 0;
 
         int total = 0;
+
         for (Facility f : facilities) {
             if (f.isOperational()) {
                 total += f.getResourceAmount(type);
             }
         }
+
         return total;
     }
 
-    //check wether the colony has enough resources
+    // Check whether the colony has enough resources
     public boolean hasEnoughResources(Map<ResourceType, Integer> required) {
         if (required == null) return false;
 
@@ -77,46 +82,60 @@ public class Colony {
         return true;
     }
 
-    //consume resources from mult facilties
+    // Consume resources from multiple facilities
     public boolean consumeResources(Map<ResourceType, Integer> required) {
+
         // bshof law el resources enough
         if (!hasEnoughResources(required)) return false;
 
-        // Consume resources from facilities (mokhtlfa 3an el fe facility )
+        // Consume resources from facilities (mokhtlfa 3an el fe facility)
         for (Map.Entry<ResourceType, Integer> entry : required.entrySet()) {
             ResourceType type = entry.getKey();
             int remaining = entry.getValue();
+
             for (Facility facility : facilities) {
+
                 if (!facility.isOperational()) {
                     continue;
                 }
+
                 int available = facility.getResourceAmount(type);
                 int take = Math.min(available, remaining);
+
                 if (take > 0) {
                     boolean consumed = facility.consumeResource(type, take);
+
                     if (!consumed) {
                         return false;
                     }
+
                     remaining -= take;
                 }
-                if (remaining == 0) { //3amlna esthlak khalas lel kemya el matloba
+
+                if (remaining == 0) {
                     break;
                 }
             }
+
             if (remaining > 0) {
                 return false;
             }
         }
+
         System.out.println("Resources consumed successfully");
         return true;
     }
+
     // Check that all required equipment is available
     // and operational in operational facilities.
     private boolean hasRequiredEquipment(BaseMission mission) {
+
         for (Equipment required : mission.getRequiredEquipment()) {
+
             if (required == null || !required.isOperational()) {
                 return false;
             }
+
             boolean found = false;
 
             for (Facility facility : facilities) {
@@ -132,6 +151,7 @@ public class Colony {
                             && available.getName() != null
                             && required.getName() != null
                             && available.getName().equals(required.getName())) {
+
                         found = true;
                         break;
                     }
@@ -146,6 +166,7 @@ public class Colony {
                 return false;
             }
         }
+
         return true;
     }
 
@@ -203,7 +224,7 @@ public class Colony {
             return false;
         }
 
-        // Only one active normal mission is allowed
+        // Only one active normal mission is allowed.
         if (!emergency && activeNormalMission != null
                 && (activeNormalMission.getStatus() == MissionStatus.ASSIGNED
                 || activeNormalMission.getStatus() == MissionStatus.IN_PROGRESS)) {
@@ -270,6 +291,7 @@ public class Colony {
             if (mission.getStatus() != MissionStatus.COMPLETED
                     && mission.getStatus() != MissionStatus.FAILED
                     && mission.getStatus() != MissionStatus.CANCELLED) {
+
                 mission.fail("Mission assignment failed: " + ex.getMessage());
             }
 
@@ -315,6 +337,7 @@ public class Colony {
         if (status == MissionStatus.COMPLETED
                 || status == MissionStatus.FAILED
                 || status == MissionStatus.CANCELLED) {
+
             activeNormalMission = null;
         }
     }
