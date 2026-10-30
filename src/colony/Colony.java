@@ -1,12 +1,9 @@
-
 package colony;
 
-// add humans and robots in an array in the colony so we can access or search them
-
-import agent.human.Human;
 import facilities.Facility;
 import facilities.Equipment;
 import mission.BaseMission;
+import mission.MissionExecutor;
 import mission.MissionStatus;
 import resource.ResourceType;
 import java.util.ArrayList;
@@ -15,75 +12,112 @@ import java.util.Map;
 import agent.Agent;
 import java.util.Collections;
 
- //hna be manage el facilities bel functions bta3tha
+//hna be manage el facilities bel functions bta3tha
 public class Colony {
 
-    private final List<Facility> facilities; // final to protect the pointer from being deleted by accident
-     private final List<Agent> agents;    // acts like a database for all agents
-     // Keeps track of the active normal mission.
-     private BaseMission activeNormalMission;
+    private final List<Facility> facilities;
+    private final List<Agent> agents;    // acts like a database for all agents
+
+    // Keeps track of the active normal mission.
+    private BaseMission activeNormalMission;
+
+    // Manages mission execution and tracks registered missions.
+    private final MissionExecutor missionExecutor = new MissionExecutor();
 
     public Colony() {
-
         facilities = new ArrayList<>();
-        agents=new ArrayList<>();
+        agents = new ArrayList<>();
     }
 
     // Add a facility to the colony
-
     public void addFacility(Facility facility) {
         if (facility != null) {
             facilities.add(facility);
         }
     }
 
-    public void addAgent(Agent agent){
+    public void addAgent(Agent agent) {
         agents.add(agent);
-
     }
 
-     public List<Facility> getFacilities() {
-         return Collections.unmodifiableList(facilities);
-     }
+    public List<Facility> getFacilities() {
+        return Collections.unmodifiableList(facilities);
+    }
+
     public List<Agent> getAgents() {
         return Collections.unmodifiableList(agents);
     }
 
     // Calculate total resources in operational facilities
     public int getTotalResources(ResourceType type) {
-        if(type==null) return 0;
-        int total = 0;
+        if (type == null) return 0;
 
+        int total = 0;
         for (Facility f : facilities) {
             if (f.isOperational()) {
                 total += f.getResourceAmount(type);
             }
         }
-
         return total;
     }
 
-    //check wether the colony has enough resorces
-     public boolean hasEnoughResources(Map <ResourceType,Integer> required) {
-        if(required==null || required.isEmpty()) return false;
+    //check wether the colony has enough resources
+    public boolean hasEnoughResources(Map<ResourceType, Integer> required) {
+        if (required == null) return false;
+
         for (Map.Entry<ResourceType, Integer> entry : required.entrySet()) {
-             ResourceType type = entry.getKey();
-             Integer value = entry.getValue();
-             if(type==null || value==null || value<0) return false;
-             if(getTotalResources(type)<value) return false;
-         }
+            ResourceType type = entry.getKey();
+            Integer value = entry.getValue();
+
+            if (type == null || value == null || value < 0) return false;
+
+            if (getTotalResources(type) < value) return false;
+        }
+
         return true;
-     }
+    }
+
     //consume resources from mult facilties
     public boolean consumeResources(Map<ResourceType, Integer> required) {
-
         // bshof law el resources enough
-        if(!hasEnoughResources(required)) return false;
+        if (!hasEnoughResources(required)) return false;
 
         // Consume resources from facilities (mokhtlfa 3an el fe facility )
         for (Map.Entry<ResourceType, Integer> entry : required.entrySet()) {
             ResourceType type = entry.getKey();
             int remaining = entry.getValue();
+            for (Facility facility : facilities) {
+                if (!facility.isOperational()) {
+                    continue;
+                }
+                int available = facility.getResourceAmount(type);
+                int take = Math.min(available, remaining);
+                if (take > 0) {
+                    boolean consumed = facility.consumeResource(type, take);
+                    if (!consumed) {
+                        return false;
+                    }
+                    remaining -= take;
+                }
+                if (remaining == 0) { //3amlna esthlak khalas lel kemya el matloba
+                    break;
+                }
+            }
+            if (remaining > 0) {
+                return false;
+            }
+        }
+        System.out.println("Resources consumed successfully");
+        return true;
+    }
+    // Check that all required equipment is available
+    // and operational in operational facilities.
+    private boolean hasRequiredEquipment(BaseMission mission) {
+        for (Equipment required : mission.getRequiredEquipment()) {
+            if (required == null || !required.isOperational()) {
+                return false;
+            }
+            boolean found = false;
 
             for (Facility facility : facilities) {
 
@@ -91,191 +125,197 @@ public class Colony {
                     continue;
                 }
 
-                int available = facility.getResourceAmount(type);
-                int take = Math.min(available, remaining);
+                for (Equipment available : facility.getEquipment()) {
 
-                if (take > 0) {
-                    boolean consumed = facility.consumeResource(type, take);
-
-                    if (!consumed) {
-                        return false;
+                    if (available != null
+                            && available.isOperational()
+                            && available.getName() != null
+                            && required.getName() != null
+                            && available.getName().equals(required.getName())) {
+                        found = true;
+                        break;
                     }
-                    remaining -= take;
                 }
 
-                if (remaining == 0) { //3amlna esthlak khalas lel kemya el matloba
+                if (found) {
                     break;
                 }
             }
-        }
 
-        System.out.println("Resources consumed successfully");
+            if (!found) {
+                return false;
+            }
+        }
         return true;
     }
-     // Check that all required equipment is available
-     // and operational in operational facilities.
-     private boolean hasRequiredEquipment(BaseMission mission) {
 
-         for (Equipment required : mission.getRequiredEquipment()) {
+    // Check whether all selected agents belong to this colony
+    // and are available and capable of performing the mission.
+    private String validateAgents(BaseMission mission, List<Agent> selectedAgents) {
 
-             if (required == null || !required.isOperational()) {
-                 return false;
-             }
+        if (selectedAgents == null || selectedAgents.isEmpty()) {
+            return "No agents selected for the mission.";
+        }
 
-             boolean found = false;
+        List<Agent> checkedAgents = new ArrayList<>();
 
-             for (Facility facility : facilities) {
+        for (Agent agent : selectedAgents) {
 
-                 if (!facility.isOperational()) {
-                     continue;
-                 }
+            if (agent == null || !agents.contains(agent)) {
+                return "Invalid agent or agent does not belong to this colony.";
+            }
 
-                 for (Equipment available : facility.getEquipment()) {
+            if (checkedAgents.contains(agent)) {
+                return "The same agent cannot be assigned twice.";
+            }
 
-                     if (available != null
-                             && available.isOperational()
-                             && available.getName().equalsIgnoreCase(
-                             required.getName())) {
+            checkedAgents.add(agent);
 
-                         found = true;
-                         break;
-                     }
-                 }
+            if (!agent.isAvailable()) {
+                return "Agent is not available: " + agent.getName();
+            }
 
-                 if (found) {
-                     break;
-                 }
-             }
+            if (!agent.canPerform(mission)) {
+                return "Agent does not meet mission requirements: "
+                        + agent.getName();
+            }
+        }
 
-             if (!found) {
-                 return false;
-             }
-         }
+        if (!mission.isCoveredBy(checkedAgents)) {
+            return "The selected team does not cover all required capabilities.";
+        }
 
-         return true;
-     }
+        return null;
+    }
 
-     // Check whether all selected agents belong to this colony
-     // and are available and capable of performing the mission.
-     private String validateAgents(BaseMission mission, List<Agent> selectedAgents) {
+    // Main mission admission and starting method.
+    public boolean startMission(BaseMission mission, List<Agent> selectedAgents, boolean emergency) {
 
-         if (selectedAgents == null || selectedAgents.isEmpty()) {
-             return "No agents selected for the mission.";
-         }
+        // Clear the normal mission slot if its previous mission has ended.
+        updateActiveMission();
 
-         List<Agent> checkedAgents = new ArrayList<>();
+        if (mission == null) {
+            return false;
+        }
 
-         for (Agent agent : selectedAgents) {
+        // A mission must be new before it can be accepted.
+        if (mission.getStatus() != MissionStatus.PENDING) {
+            return false;
+        }
 
-             if (agent == null || !agents.contains(agent)) {
-                 return "Invalid agent or agent does not belong to this colony.";
-             }
+        // Only one active normal mission is allowed
+        if (!emergency && activeNormalMission != null
+                && (activeNormalMission.getStatus() == MissionStatus.ASSIGNED
+                || activeNormalMission.getStatus() == MissionStatus.IN_PROGRESS)) {
 
-             if (checkedAgents.contains(agent)) {
-                 return "The same agent cannot be assigned twice.";
-             }
+            mission.fail("Another normal mission is already active.");
+            return false;
+        }
 
-             checkedAgents.add(agent);
+        // Validate selected agents.
+        String agentError = validateAgents(mission, selectedAgents);
 
-             if (!agent.isAvailable()) {
-                 return "Agent is not available: " + agent.getName();
-             }
+        if (agentError != null) {
+            mission.fail(agentError);
+            return false;
+        }
 
-             if (!agent.canPerform(mission)) {
-                 return "Agent does not meet mission requirements: "
-                         + agent.getName();
-             }
-         }
+        // Validate equipment.
+        if (!hasRequiredEquipment(mission)) {
+            mission.fail(
+                    "Required equipment is missing or not operational.");
+            return false;
+        }
 
-         if (!mission.isCoveredBy(checkedAgents)) {
-             return "The selected team does not cover all required capabilities.";
-         }
-         return null;
-     }
+        // Validate resources before consuming anything.
+        if (!hasEnoughResources(mission.getRequiredResources())) {
+            mission.fail("Insufficient colony resources.");
+            return false;
+        }
 
-     // Main mission admission and starting method.
-     public boolean startMission(BaseMission mission, List<Agent> selectedAgents, boolean emergency) {
+        // Assign all selected agents.
+        try {
+            for (Agent agent : selectedAgents) {
+                mission.assignAgent(agent);
+            }
 
-         if (mission == null) {
-             return false;
-         }
+            // Check that the mission is fully covered.
+            if (mission.getStatus() != MissionStatus.ASSIGNED) {
+                mission.fail(
+                        "Selected agents do not satisfy mission requirements.");
+                return false;
+            }
 
-         // A mission must be new before it can be accepted.
-         if (mission.getStatus() != MissionStatus.PENDING) {
-             return false;
-         }
+            // Consume resources only after validation and assignment.
+            if (!consumeResources(mission.getRequiredResources())) {
+                mission.fail("Failed to consume required resources.");
+                return false;
+            }
 
-         // Only one active normal mission is allowed.
-         if (!emergency && activeNormalMission != null
-                 && (activeNormalMission.getStatus()
-                 == MissionStatus.ASSIGNED
-                 || activeNormalMission.getStatus()
-                 == MissionStatus.IN_PROGRESS)) {
+            // Start the mission.
+            mission.start();
 
-             mission.fail("Another normal mission is already active.");
-             return false;
-         }
+            // Register the mission so its progress can be managed.
+            missionExecutor.addMission(mission);
 
-         // Validate selected agents.
-         String agentError = validateAgents(mission, selectedAgents);
+            // Track only normal missions here.
+            if (!emergency) {
+                activeNormalMission = mission;
+            }
 
-         if (agentError != null) {
-             mission.fail(agentError);
-             return false;
-         }
+            return true;
 
-         // Validate equipment.
-         if (!hasRequiredEquipment(mission)) {
-             mission.fail(
-                     "Required equipment is missing or not operational.");
-             return false;
-         }
+        } catch (IllegalArgumentException | IllegalStateException ex) {
 
-         // Validate resources before consuming anything.
-         if (!hasEnoughResources(mission.getRequiredResources())) {
-             mission.fail("Insufficient colony resources.");
-             return false;
-         }
+            if (mission.getStatus() != MissionStatus.COMPLETED
+                    && mission.getStatus() != MissionStatus.FAILED
+                    && mission.getStatus() != MissionStatus.CANCELLED) {
+                mission.fail("Mission assignment failed: " + ex.getMessage());
+            }
 
-         // Assign all selected agents.
-         try {
-             for (Agent agent : selectedAgents) {
-                 mission.assignAgent(agent);
-             }
+            return false;
+        }
+    }
 
-             // Check that the mission is fully covered.
-             if (mission.getStatus() != MissionStatus.ASSIGNED) {
-                 mission.fail(
-                         "Selected agents do not satisfy mission requirements.");
-                 return false;
-             }
+    // Get the currently active normal mission.
+    public BaseMission getActiveNormalMission() {
+        updateActiveMission();
+        return activeNormalMission;
+    }
 
-             // Consume resources only after validation and assignment.
-             if (!consumeResources(mission.getRequiredResources())) {
-                 mission.fail("Failed to consume required resources.");
-                 return false;
-             }
+    // Get all missions registered with the executor.
+    public List<BaseMission> getMissions() {
+        return missionExecutor.getMissions();
+    }
 
-             // Start the mission.
-             mission.start();
+    // Get all completed missions.
+    public List<BaseMission> getCompletedMissions() {
+        return missionExecutor.getCompletedMissions();
+    }
 
-             // Track only normal missions here.
-             if (!emergency) {
-                 activeNormalMission = mission;
-             }
+    // Get all failed missions.
+    public List<BaseMission> getFailedMissions() {
+        return missionExecutor.getFailedMissions();
+    }
 
-             return true;
+    // Advance time for all missions that are currently in progress.
+    public void advanceTime(int units) {
+        missionExecutor.advanceTime(units);
+        updateActiveMission();
+    }
 
-         } catch (IllegalArgumentException | IllegalStateException ex) {
+    // Release the normal mission slot when its mission has ended.
+    private void updateActiveMission() {
+        if (activeNormalMission == null) {
+            return;
+        }
 
-             mission.fail("Mission assignment failed: " + ex.getMessage());
-             return false;
-         }
-     }
+        MissionStatus status = activeNormalMission.getStatus();
 
-     // Get the currently active normal mission.
-     public BaseMission getActiveNormalMission() {
-         return activeNormalMission;
-     }
-
+        if (status == MissionStatus.COMPLETED
+                || status == MissionStatus.FAILED
+                || status == MissionStatus.CANCELLED) {
+            activeNormalMission = null;
+        }
+    }
 }

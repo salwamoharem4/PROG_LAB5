@@ -58,6 +58,21 @@ public abstract class BaseMission implements Mission {
         if (requiredBattery < 0 || requiredBattery > 100) {
             throw new IllegalArgumentException("Invalid battery requirement");
         }
+        if (type == null) {
+            throw new IllegalArgumentException("Mission type cannot be null");
+        }
+
+        if (duration <= 0) {
+            throw new IllegalArgumentException("Duration must be positive");
+        }
+
+        if (elapsedTime < 0) {
+            throw new IllegalArgumentException("Invalid elapsed time");
+        }
+
+        if (status == MissionStatus.IN_PROGRESS && elapsedTime >= duration) {
+            throw new IllegalArgumentException("An in-progress mission must have time remaining");
+        }
         this.id = id;
         this.name = name;
         this.type = type;
@@ -68,10 +83,11 @@ public abstract class BaseMission implements Mission {
         this.requiredCapabilities = requiredCapabilities.isEmpty()? EnumSet.noneOf(Capability.class): EnumSet.copyOf(requiredCapabilities);
         this.requiredSkills = requiredSkills.isEmpty() ? EnumSet.noneOf(Skill.class) : EnumSet.copyOf(requiredSkills);
         this.requiredBattery = requiredBattery;
-        this.requiredResources = requiredResources;
+        this.requiredResources = Collections.unmodifiableMap(new java.util.EnumMap<>(requiredResources));
         this.targetLocation = targetLocation;
         this.requiredEquipment =new ArrayList<>(requiredEquipment);
         this.assignedAgents = new ArrayList<>();
+
     }
     // Get mission ID.
     public int getId() {
