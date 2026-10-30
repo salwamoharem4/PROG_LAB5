@@ -76,10 +76,10 @@ public abstract class BaseMission implements Mission {
         this.id = id;
         this.name = name;
         this.type = type;
-        this.status = (status == null) ? MissionStatus.PENDING : status;
+        this.status = MissionStatus.PENDING;
         this.duration = duration;
-        this.elapsedTime = elapsedTime;
-        this.failureReason = failureReason;
+        this.elapsedTime = 0;
+        this.failureReason = null;
         this.requiredCapabilities = requiredCapabilities.isEmpty()? EnumSet.noneOf(Capability.class): EnumSet.copyOf(requiredCapabilities);
         this.requiredSkills = requiredSkills.isEmpty() ? EnumSet.noneOf(Skill.class) : EnumSet.copyOf(requiredSkills);
         this.requiredBattery = requiredBattery;
@@ -102,6 +102,7 @@ public abstract class BaseMission implements Mission {
     public MissionType getType() {
         return type;
     }
+
     public MissionStatus getStatus() {
         return status;
     }
@@ -110,10 +111,10 @@ public abstract class BaseMission implements Mission {
         return duration;
     }
 
-
     public int getElapsedTime() {
         return elapsedTime;
     }
+
     public String getFailureReason() {
         return failureReason;
     }
@@ -201,8 +202,7 @@ public abstract class BaseMission implements Mission {
 
         status = MissionStatus.IN_PROGRESS;
     }
-
-    // Advance mission time.(lama btwsl lel duration m3naha en mission is completed)
+    // Advance mission time.
     public void advanceTime(int units) {
         if (status != MissionStatus.IN_PROGRESS) {
             throw new IllegalStateException("Mission is not in progress");

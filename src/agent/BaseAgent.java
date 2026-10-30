@@ -7,15 +7,7 @@ import mission.Mission;
 
 import java.util.Collections;
 
-// Contains the common fields and methods for all agents.
 public abstract class BaseAgent implements Agent {
-
-    /*
-     * In this design I used protected for the constructor to let only
-     * subclasses of BaseAgent access it.
-     * I used final to prevent Human or Robot from overriding the method
-     * and accidentally changing the availability rule.
-     */
 
     private final int id;
     private final String name;
@@ -24,17 +16,15 @@ public abstract class BaseAgent implements Agent {
 
     protected BaseAgent(int id, String name, Location location) {
         if (id <= 0) {
-            throw new IllegalArgumentException("ID must be positive");
+            throw new IllegalArgumentException("Agent ID must be positive.");
         }
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("Invalid name");
-        }
-        if (location == null) {
-            throw new IllegalArgumentException("Invalid location");
+
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Agent name cannot be empty.");
         }
 
         this.id = id;
-        this.name = name.trim();
+        this.name = name;
         this.location = location;
     }
 
@@ -54,40 +44,27 @@ public abstract class BaseAgent implements Agent {
     }
 
     @Override
-    public void moveTo(Location location) {
-        if (location == null) {
-            throw new IllegalArgumentException("Invalid location");
-        }
+    public void setLocation(Location location) {
         this.location = location;
     }
 
-    // The agent is available if it is not on a mission and is usable.
     @Override
-    public final boolean isAvailable() {
-        return available && isUsable();
+    public boolean isAvailable() {
+        return available;
     }
 
     @Override
-    public void assign() {
-        if (!isAvailable()) {
-            throw new IllegalStateException(name + " is not available");
-        }
-        available = false;
+    public void setAvailability(boolean available) {
+        this.available = available;
     }
 
-    @Override
-    public void release() {
-        available = true;
-    }
-
-    // Checks if the agent can perform the mission.
     @Override
     public final boolean canPerform(Mission mission) {
+
         if (mission == null || !isAvailable()) {
             return false;
         }
 
-        // The agent must have at least one of the required capabilities.
         if (Collections.disjoint(
                 getCapabilities(),
                 mission.getRequiredCapabilities())) {
@@ -97,16 +74,13 @@ public abstract class BaseAgent implements Agent {
         return meetsMissionConditions(mission);
     }
 
-    // Subclasses can add extra conditions for their missions.
     protected boolean meetsMissionConditions(Mission mission) {
 
-        // Check required scientific skills.
-        if (getSkills() == null ||
-                !getSkills().containsAll(mission.getRequiredSkills())) {
+        if (getSkills() == null
+                || !getSkills().containsAll(mission.getRequiredSkills())) {
             return false;
         }
 
-        // Check sufficient battery.
         if (getBatteryLevel() < mission.getRequiredBattery()) {
             return false;
         }
@@ -116,31 +90,9 @@ public abstract class BaseAgent implements Agent {
 
     @Override
     public boolean canHandle(EmergencyType type) {
+
         return type != null
                 && isAvailable()
-                && getCapabilities().contains(
-                type.getRequiredCapability());
-    }
-
-    @Override
-    // Prints the information of the agent.
-    public String toString() {
-        return getClass().getSimpleName() + "[" + id + ", " + name
-                + ", at " + location.getName() + "]";
-    }
-
-    @Override
-    public void setAvailability(boolean b) {
-        this.available = b;
-    }
-
-    @Override
-    public boolean isHuman() {
-        return false; // By default, false.
-    }
-
-    @Override
-    public boolean isRobot() {
-        return false; // By default, false.
+                && getCapabilities().contains(type.getRequiredCapability());
     }
 }

@@ -1,3 +1,4 @@
+
 import agent.Agent;
 import agent.human.Engineer;
 import agent.human.HealthStatus;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/** Smoke test. Note there is no instanceof and no cast anywhere: everything goes through Agent. */
 public class Main {
 
         static int failures = 0;
