@@ -13,7 +13,7 @@ public class RepairRobot extends Robot {
             Collections.unmodifiableSet(EnumSet.of(Capability.REPAIR));
 
     public RepairRobot(int id, String name, Location location, int batteryLevel) {
-        super(id, name, location, batteryLevel);
+        super(id, name, location, Collections.emptySet(), batteryLevel);
     }
 
     @Override

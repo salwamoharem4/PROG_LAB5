@@ -23,7 +23,7 @@ public class ExplorationMission extends BaseMission {
 
     // Exploration always requires EXPLORE capability.
     private static final Set<Capability> DEFAULT_CAPABILITIES =
-            Collections.unmodifiableSet(EnumSet.of(Capability.EXPLORE));
+            Collections.unmodifiableSet(EnumSet.of(Capability.EXPLORE)); //hwa da el isCoveredBy in Mission compares against the team’s capabilities.
 
     // Full constructor with all details.
     public ExplorationMission(int id, String name, int duration,
@@ -70,5 +70,35 @@ public class ExplorationMission extends BaseMission {
              new EnumMap<>(ResourceType.class),
              Surface.INSTANCE,
              new ArrayList<>());
+    }
+    // Checks whether all required equipment is operational.
+    public boolean hasOperationalRequiredEquipment() {
+
+        for (Equipment equipment : getRequiredEquipment()) {
+
+            if (equipment == null || !equipment.isOperational()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // Returns a clear explanation if equipment is not operational.
+    public String getEquipmentFailureReason() {
+
+        for (Equipment equipment : getRequiredEquipment()) {
+
+            if (equipment == null) {
+                return "Required equipment is missing.";
+            }
+
+            if (!equipment.isOperational()) {
+                return "Required equipment is not operational: "
+                        + equipment.getName();
+            }
+        }
+
+        return null;
     }
 }

@@ -44,6 +44,10 @@ public abstract class Facility implements Location {
         this.operationalStatus = operationalStatus;
     }
 
+    public ArrayList<Equipment> getEquipment() {
+        return equipment;
+    }
+
     public boolean setName(String name) {
         if(name==null || name.isEmpty()) return false;
         this.name = name;

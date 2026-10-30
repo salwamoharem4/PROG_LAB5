@@ -13,7 +13,7 @@ public class Rover extends Robot {
             Collections.unmodifiableSet(EnumSet.of(Capability.EXPLORE, Capability.RESCUE));
 
     public Rover(int id, String name, Location location, int batteryLevel) {
-        super(id, name, location, batteryLevel);
+        super(id, name, location, Collections.emptySet(), batteryLevel);
     }
 
     @Override

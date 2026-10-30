@@ -4,6 +4,10 @@ package agent;
 import core.EmergencyType;
 import core.Location;
 import mission.Mission;
+import mission.missiontype.ExplorationMission;
+import mission.missiontype.RepairMission;
+import mission.missiontype.RescueMission;
+import mission.missiontype.ResearchMission;
 
 import java.util.Collections;
 
@@ -83,7 +87,10 @@ from overriding the method and accidentally changing the availability rule */
             return false;
         }
 
-        if (Collections.disjoint(getCapabilities(), mission.getRequiredCapabilities())) {
+        // The agent must have at least one of the required capabilities.
+        if (Collections.disjoint(
+                getCapabilities(),
+                mission.getRequiredCapabilities())) {
             return false;
         }
 
@@ -92,14 +99,59 @@ from overriding the method and accidentally changing the availability rule */
 
     // Subclasses can add extra conditions for their missions.
     protected boolean meetsMissionConditions(Mission mission) {
+        // Check required scientific skills.
+        if (getSkills() == null ||
+                !getSkills().containsAll(mission.getRequiredSkills())) {
+            return false;
+        }
+
+        // Check sufficient battery.
+        if (getBatteryLevel() < mission.getRequiredBattery()) {
+            return false;
+        }
+
+        // Check exploration equipment.
+        if (mission instanceof ExplorationMission) {
+
+            ExplorationMission exploration =
+                    (ExplorationMission) mission;
+
+            if (!exploration.hasOperationalRequiredEquipment()) {
+                return false;
+            }
+        }
+    if (mission instanceof RepairMission) {
+
+        RepairMission repair = (RepairMission) mission;
+
+        if (!repair.hasOperationalRequiredEquipment()) {
+            return false;
+        }
+    }
+        if (mission instanceof RescueMission) {
+
+            RescueMission rescue = (RescueMission) mission;
+
+            if (!rescue.hasOperationalRequiredEquipment()) {
+                return false;
+            }
+        }
+        if (mission instanceof ResearchMission) {
+
+            ResearchMission research = (ResearchMission) mission;
+
+            if (!research.hasOperationalRequiredEquipment()) {
+                return false;
+            }
+        }
         return true;
     }
-
     @Override
     public boolean canHandle(EmergencyType type) {
         return type != null
                 && isAvailable()
-                && getCapabilities().contains(type.getRequiredCapability());
+                && getCapabilities().contains(
+                type.getRequiredCapability());
     }
 
     @Override
