@@ -1,53 +1,52 @@
 package emergencies;
 
 import core.EmergencyType;
-import facilities.Habitat;
+import facilities.Facility;
 import agent.BaseAgent;
 import resource.ResourceType;
 
 import java.util.List;
 
  // DON'T FORGET TO ADD RELEASE AFTER TIME DURATION
-public class OxygenLeak extends emergency {
+ public class OxygenLeak extends emergency {
 
-    private Habitat affectedHabitat;
-    private  int OxygenLoss;
+     private Facility affectedFacility;
+     private int OxygenLoss;
+     private int totalOxygenLost = 0; // <-- 1. Track the running total!
 
-    public OxygenLeak(EmergencyType type , Habitat affectedHabitatHabitat , int OxygenLoss) {
-        super(type,affectedHabitatHabitat);
-        this.affectedHabitat=affectedHabitatHabitat;
-        this.OxygenLoss=OxygenLoss;
+     public OxygenLeak( Facility affectedFacility, int OxygenLoss) {
+         super(EmergencyType.OXYGEN_LEAK, affectedFacility);
+         this.affectedFacility = affectedFacility;
+         this.OxygenLoss = OxygenLoss;
 
+         applyOxygenLoss(OxygenLoss); // First deduction
+     }
 
-    }
+     private void applyOxygenLoss(int oxygenLossAmount) {
+         int current = affectedFacility.getResourceAmount(ResourceType.OXYGEN);
+         affectedFacility.consumeResource(ResourceType.OXYGEN, oxygenLossAmount);
 
-    private void applyOxygenLoss(int oxygenLossAmount){
+         int actualLost = current - affectedFacility.getResourceAmount(ResourceType.OXYGEN);
+         this.totalOxygenLost += actualLost; // <-- 2. Add to running total!
 
+         System.out.println("Oxygen leak in [" + affectedFacility.getName() + "]: lost "
+                 + actualLost + " units. Total lost so far: " + this.totalOxygenLost);
+     }
 
-        int current = affectedHabitat.getResourceAmount(ResourceType.OXYGEN);
-        affectedHabitat.consumeResource(ResourceType.OXYGEN,oxygenLossAmount);
+     @Override
+     public boolean resolve(List<BaseAgent> candidateResponders) {
+         if (!dispatchTeam(candidateResponders)) {
+             applyOxygenLoss(this.OxygenLoss); // Second deduction
+             return false;
+         }
 
-        System.out.println("Oxygen leak in [" + affectedHabitat.getName() + "]: lost " + (current - affectedHabitat.getResourceAmount(ResourceType.OXYGEN)) + " units. Remaining: " + affectedHabitat.getResourceAmount(ResourceType.OXYGEN));
+         markResolved();
+         System.out.println("Oxygen leak Repaired! Total oxygen lost: " + totalOxygenLost);
+         return true;
+     }
 
-    }
-
-
-
-    @Override
-    public boolean resolve(List<BaseAgent> candidateResponders) {
-        if(!dispatchTeam(candidateResponders)){
-            applyOxygenLoss(this.OxygenLoss);
-            return false;
-        }
-
-
-        markResolved();
-        System.out.println("Oxygen leak Repaired !!");
-        return true;
-
-
-    }
-    public Habitat getAffectedHabitat(){
-        return affectedHabitat;
-    }
-}
+     // <-- 3. Public getter for status reports and tests
+     public int getTotalOxygenLost() {
+         return totalOxygenLost;
+     }
+ }

@@ -66,7 +66,6 @@ public abstract class emergency {
             agent.setAvailability(true);
         }
 
-        dispatchedResponders.clear();
     }
     public void markResolved(){
         setStatus(EmergencyStatus.RESOLVED);
@@ -81,7 +80,7 @@ public abstract class emergency {
     }
 
 
-    protected boolean dispatchTeam(List<BaseAgent> candidateResponders){
+    protected boolean dispatchTeam(List<BaseAgent> candidateResponders){  // searches all agents for an appropriate team
     BaseAgent human = null;
     BaseAgent robot = null;
 

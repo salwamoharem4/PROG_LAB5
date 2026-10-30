@@ -1,6 +1,5 @@
-
-
 import agent.Agent;
+import agent.BaseAgent;
 import agent.human.Engineer;
 import agent.human.HealthStatus;
 import agent.human.MedicalOfficer;
@@ -8,13 +7,25 @@ import agent.human.Scientist;
 import agent.robot.Drone;
 import agent.robot.RepairRobot;
 import agent.robot.Rover;
+
 import core.Capability;
 import core.EmergencyType;
 import core.Location;
 import core.Skill;
 import core.Surface;
+
+import facilities.Habitat;
+import resource.ResourceType;
+
+import emergencies.EmergencyStatus;
+import emergencies.Fire;
+import emergencies.OxygenLeak;
+import emergencies.RoverBreakdown;
+import emergencies.Medical;
+
 import mission.Mission;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -39,7 +50,15 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        Location habitatA = () -> "Habitat A";
+        // ================================================================
+        // 1. SETUP CORE FACILITY & AGENTS
+        // ================================================================
+        System.out.println("--- 1. AGENT & MISSION TESTS ---");
+
+        // Real Habitat that satisfies both Facility and Location
+        Habitat habitatA = new Habitat("Habitat A", "Sector-1", 10, true);
+        habitatA.addResource(ResourceType.OXYGEN, 500);
+        habitatA.addResource(ResourceType.MEDICAL_SUPPLIES, 10);
 
         Scientist sci = new Scientist(1, "Dr. Sara", habitatA, HealthStatus.HEALTHY,
                 EnumSet.of(Skill.GEOLOGY), 10);
@@ -91,8 +110,12 @@ public class Main {
         check("broken robot not available", fixer.isAvailable(), false);
         fixer.repair();
         check("repaired robot available", fixer.isAvailable(), true);
-        sci.addFatigue(100);
-        check("exhausted scientist not available", sci.isAvailable(), false);
+
+        // Fatigue check (Start from 0 so 0 + 100 = 100 without throwing > 100 exception!)
+        Scientist tiredSci = new Scientist(8, "Tired", habitatA, HealthStatus.HEALTHY,
+                EnumSet.noneOf(Skill.class), 0);
+        tiredSci.addFatigue(100);
+        check("exhausted scientist not available", tiredSci.isAvailable(), false);
 
         // Treatment raises health
         med.worsenHealth();
@@ -106,8 +129,50 @@ public class Main {
         rover.moveTo(Surface.INSTANCE);
         rover.breakDown();
         check("broken rover stays on surface", rover.getLocation() == Surface.INSTANCE, true);
+        rover.repair(); // Restore rover for emergency testing
+        rover.moveTo(habitatA);
 
-        System.out.println(failures == 0 ? "\nALL CHECKS PASSED" : "\nFAILURES: " + failures);
+        // ================================================================
+        // 2. EMERGENCY SYSTEM TESTS
+        // ================================================================
+        System.out.println("\n--- 2. EMERGENCY SYSTEM EXECUTION TESTS ---");
+
+        List<BaseAgent> fullRoster = new ArrayList<>(List.of(eng, med, sci, fixer, rover, drone));
+
+        // --- TEST A: OXYGEN LEAK (Double penalty failure when missing robot) ---
+        Habitat leakHabitat = new Habitat("Leak-Habitat", "Sector-2", 10, true);
+        leakHabitat.addResource(ResourceType.OXYGEN, 500);
+
+        List<BaseAgent> onlyHumans = List.of(eng, med, sci);
+        int oxygenBefore = leakHabitat.getResourceAmount(ResourceType.OXYGEN);
+
+        OxygenLeak leakFail = new OxygenLeak(leakHabitat, 50); // deducts 50 initial
+        check("leak fails when only humans available", leakFail.resolve(onlyHumans), false);
+        check("unresolved leak has status UNRESOLVED", leakFail.getStatus() == EmergencyStatus.UNRESOLVED, true);
+        check("unresolved leak took double penalty (100 total)",
+                leakHabitat.getResourceAmount(ResourceType.OXYGEN) == (oxygenBefore - 100), true);
+
+        // --- TEST B: OXYGEN LEAK (Successful resolution with Engineer + Fixer) ---
+        OxygenLeak leakPass = new OxygenLeak(leakHabitat, 30);
+        check("leak resolved with full team", leakPass.resolve(fullRoster), true);
+        check("resolved leak has status RESOLVED", leakPass.getStatus() == EmergencyStatus.RESOLVED, true);
+
+        // --- TEST C: ROVER BREAKDOWN ---
+        RoverBreakdown breakdown = new RoverBreakdown(rover);
+        check("breakdown resolved by engineer + fixer", breakdown.resolve(fullRoster), true);
+        check("breakdown status is RESOLVED", breakdown.getStatus() == EmergencyStatus.RESOLVED, true);
+        check("rover operational after repair", rover.isUsable(), true);
+
+        // --- TEST D: MEDICAL EMERGENCY ---
+        // Patient Dr. Sara treated by Dr. Lina in habitatA
+        Medical medicalIncident = new Medical(habitatA, sci);
+        check("medical emergency resolved", medicalIncident.resolve(fullRoster), true);
+        check("medical status is RESOLVED", medicalIncident.getStatus() == EmergencyStatus.RESOLVED, true);
+
+        // ================================================================
+        // RESULTS
+        // ================================================================
+        System.out.println(failures == 0 ? "\nALL CHECKS PASSED!" : "\nFAILURES: " + failures);
         System.exit(failures == 0 ? 0 : 1);
     }
 }
