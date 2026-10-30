@@ -27,10 +27,11 @@ public abstract class BaseMission implements Mission {
     private final Set<Capability> requiredCapabilities;
     private final Set<Skill> requiredSkills;
     private final int requiredBattery;
-   private final Map<ResourceType, Integer> requiredResources;
+    private final Map<ResourceType, Integer> requiredResources;
     private final Location targetLocation;
     private final List<Equipment> requiredEquipment;
     private final List<Agent> assignedAgents;
+
     public BaseMission(int id, String name, MissionType type, MissionStatus status, int duration, int elapsedTime,
             String failureReason, Set<Capability> requiredCapabilities, Set<Skill> requiredSkills, int requiredBattery,
             Map<ResourceType, Integer> requiredResources, Location targetLocation, List<Equipment> requiredEquipment,
@@ -60,16 +61,16 @@ public abstract class BaseMission implements Mission {
         this.id = id;
         this.name = name;
         this.type = type;
-        this.status = MissionStatus.PENDING;
+        this.status = (status == null) ? MissionStatus.PENDING : status;
         this.duration = duration;
-        this.elapsedTime = 0;
-        this.failureReason = null;
+        this.elapsedTime = elapsedTime;
+        this.failureReason = failureReason;
         this.requiredCapabilities = requiredCapabilities.isEmpty()? EnumSet.noneOf(Capability.class): EnumSet.copyOf(requiredCapabilities);
         this.requiredSkills = requiredSkills.isEmpty() ? EnumSet.noneOf(Skill.class) : EnumSet.copyOf(requiredSkills);
         this.requiredBattery = requiredBattery;
         this.requiredResources = requiredResources;
         this.targetLocation = targetLocation;
-        this.requiredEquipment = requiredEquipment;
+        this.requiredEquipment =new ArrayList<>(requiredEquipment);
         this.assignedAgents = new ArrayList<>();
     }
     // Get mission ID.
@@ -85,7 +86,7 @@ public abstract class BaseMission implements Mission {
     public MissionType getType() {
         return type;
     }
-
+    @Override
     public MissionStatus getStatus() {
         return status;
     }
@@ -94,10 +95,11 @@ public abstract class BaseMission implements Mission {
         return duration;
     }
 
+
     public int getElapsedTime() {
         return elapsedTime;
     }
-
+    @Override
     public String getFailureReason() {
         return failureReason;
     }
@@ -131,13 +133,23 @@ public abstract class BaseMission implements Mission {
 
     public List<Agent> getAssignedAgents() {
         return Collections.unmodifiableList(assignedAgents);
-    }//this method chexks wether the agent canperform or not assigned to mission and then assign them 
+    }//this method chexks wether the agent canperform or not assigned to mission and then assign them
+
     public void assignAgent(Agent agent){
-        if(agent==null||!agent.canPerform(this)){
-             throw new IllegalArgumentException("Agent cannot perform this mission");
+        if(agent==null){
+             throw new IllegalArgumentException("Agent cannot be null");
+        }
+        if(status!=MissionStatus.PENDING && status !=MissionStatus.ASSIGNED){
+            throw new IllegalArgumentException("can not assign agent to this mission");
         }
         if(assignedAgents.contains(agent)){
             throw new IllegalArgumentException("Agent is already assigned");
+        }
+        if(!agent.isUsable() || !agent.isAvailable()){
+            throw new IllegalArgumentException("Agent is not available");
+        }
+        if(!agent.canPerform(this)){
+            throw new IllegalArgumentException("Agent can not perform");
         }
         agent.assign();
         assignedAgents.add(agent);
@@ -149,6 +161,9 @@ public abstract class BaseMission implements Mission {
     }
     // Remove an agent from the mission.
     public void removeAgent(Agent agent) {
+        if(status!=MissionStatus.PENDING && status !=MissionStatus.ASSIGNED){
+            throw new IllegalArgumentException("can not remove agent from this mission");
+        }
         if (agent == null || !assignedAgents.contains(agent)) {
             throw new IllegalArgumentException("Agent is not assigned");
         }
@@ -156,7 +171,10 @@ public abstract class BaseMission implements Mission {
         assignedAgents.remove(agent);
         agent.release();//Calling release() makes the agent available again
 
-        if (!isCoveredBy(assignedAgents)) {
+        if (isCoveredBy(assignedAgents)) {
+            status = MissionStatus.ASSIGNED;
+        }
+        else{
             status = MissionStatus.PENDING;
         }
     }
@@ -169,7 +187,8 @@ public abstract class BaseMission implements Mission {
 
         status = MissionStatus.IN_PROGRESS;
     }
-    // Advance mission time.
+
+    // Advance mission time.(lama btwsl lel duration m3naha en mission is completed)
     public void advanceTime(int units) {
         if (status != MissionStatus.IN_PROGRESS) {
             throw new IllegalStateException("Mission is not in progress");
@@ -179,12 +198,13 @@ public abstract class BaseMission implements Mission {
             throw new IllegalArgumentException("Invalid time units");
         }
 
-        elapsedTime = Math.min(duration, elapsedTime + units);
+        elapsedTime = Math.min(duration, elapsedTime + units); //add units to time spent bas mtkhleesh da y3dy el duration
 
-        if (elapsedTime >= duration) {
+        if (elapsedTime >= duration) { //lama el duration reached ,el mission completed
             complete();
         }
     }
+
     // Mark the mission as completed.
     public void complete() {
         if (status != MissionStatus.IN_PROGRESS) {
@@ -194,6 +214,7 @@ public abstract class BaseMission implements Mission {
         status = MissionStatus.COMPLETED;
         releaseAllAgents();
     }
+
      // Release all assigned agents.
     private void releaseAllAgents() {
         for (Agent agent : assignedAgents) {

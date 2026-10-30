@@ -3,17 +3,21 @@ package agent.robot;
 
 import agent.BaseAgent;
 import core.Location;
+import core.Skill;
 import mission.Mission;
+
+import java.util.Set;
 
 public abstract class Robot extends BaseAgent {
 
     public static final int MAX_BATTERY = 100;
-
+    private final Set<Skill> skills;
     private int batteryLevel;
     private boolean damaged = false;
 
-    protected Robot(int id, String name, Location location, int batteryLevel) {
+    protected Robot(int id, String name, Location location, Set<Skill> skills, int batteryLevel) {
         super(id, name, location);
+        this.skills = skills;
 
         checkBattery(batteryLevel);//checks whether the battery level is valid before storing it.
         this.batteryLevel = batteryLevel;
@@ -25,6 +29,12 @@ public abstract class Robot extends BaseAgent {
         }
     }
 
+    @Override
+    public Set<Skill> getSkills() {
+        return skills;
+    }
+
+    @Override
     public int getBatteryLevel() {
         return batteryLevel;
     }

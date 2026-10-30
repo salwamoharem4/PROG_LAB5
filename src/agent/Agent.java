@@ -4,7 +4,8 @@ import core.Capability;
 import core.EmergencyType;
 import core.Location;
 import mission.Mission;
-
+import core.Skill;
+import java.util.Collections;
 import java.util.Set;
 
 public interface Agent {
@@ -25,6 +26,16 @@ public interface Agent {
     boolean isAvailable();
 
     Set<Capability> getCapabilities();//is set to prevent duplicate capabilities.
+
+    // Skills possessed by this agent.
+    default Set<Skill> getSkills() {
+        return Collections.emptySet();
+    }
+
+    // Current battery level (0-100).
+    default int getBatteryLevel() {
+        return 0;
+    }
 
     // Check whether the agent can perform a mission.
     boolean canPerform(Mission mission);
