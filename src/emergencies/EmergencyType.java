@@ -1,7 +1,7 @@
 package emergencies;
 
-public enum emergencyType {
-    OYXGEN_LEAK,
+public enum EmergencyType {
+    OXYGEN_LEAK,
     FIRE,
     ROVER_BREAKDOWN,
     MEDICAL_EMERGENCY
