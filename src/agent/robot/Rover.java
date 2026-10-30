@@ -20,4 +20,5 @@ public class Rover extends Robot {
     public Set<Capability> getCapabilities() {
         return CAPABILITIES;
     }
+
 }

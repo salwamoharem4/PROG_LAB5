@@ -108,11 +108,20 @@ from overriding the method and accidentally changing the availability rule */
         return getClass().getSimpleName() + "[" + id + ", " + name + ", at " + location.getName() + "]";
     }
 
-
+    @Override
     public void setAvailability(boolean b){
 
         this.available=b;
 
+    }
+
+    @Override
+    public boolean isHuman() {
+        return false; // By default, false
+    }
+    @Override
+    public boolean isRobot() {
+        return false; // By default, false
     }
 
 }
