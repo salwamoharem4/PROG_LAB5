@@ -122,4 +122,8 @@ public void rest(int amount) {
         return true;
 
     }
+    @Override
+    public boolean isRobot() {
+        return false;
+    }
 }

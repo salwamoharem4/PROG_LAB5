@@ -22,4 +22,10 @@ public class Engineer extends Human {
     public Set<Capability> getCapabilities() {
         return CAPABILITIES;
     }
+
+    @Override
+    public boolean isRobot() {
+        return false;
+    }
+
 }

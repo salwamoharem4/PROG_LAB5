@@ -13,8 +13,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import agent.Agent;
-import java.util.Collections;
 
 // Manages the colony's facilities, agents, resources, and missions.
 public class Colony {
@@ -108,12 +106,15 @@ public class Colony {
         for (Map.Entry<ResourceType, Integer> entry : required.entrySet()) {
             ResourceType type = entry.getKey();
             int remaining = entry.getValue();
+
             for (Facility facility : facilities) {
                 if (!facility.isOperational()) {
                     continue;
                 }
+
                 int available = facility.getResourceAmount(type);
                 int take = Math.min(available, remaining);
+
                 if (take > 0) {
                     boolean consumed = facility.consumeResource(type, take);
 
@@ -133,6 +134,7 @@ public class Colony {
                 return false;
             }
         }
+
         System.out.println("Resources consumed successfully");
         return true;
     }
@@ -164,7 +166,6 @@ public class Colony {
                             && available.getName().equalsIgnoreCase(
                             required.getName())) {
 
-                            && available.getName().equals(required.getName())) {
                         found = true;
                         break;
                     }
@@ -232,7 +233,10 @@ public class Colony {
     }
 
     // Main mission admission and starting method.
-    public boolean startMission(BaseMission mission, List<Agent> selectedAgents, boolean emergency) {
+    public boolean startMission(
+            BaseMission mission,
+            List<Agent> selectedAgents,
+            boolean emergency) {
 
         // Clear the normal mission slot if its previous mission has ended.
         updateActiveMission();
@@ -254,7 +258,6 @@ public class Colony {
             return rejectMission(
                     mission,
                     "Another normal mission is already active.");
-            return rejectMission(mission, "Another normal mission is already active.");
         }
 
         // Validate selected agents.
@@ -265,13 +268,10 @@ public class Colony {
         }
 
         // Validate required equipment.
-        // Validate equipment.
         if (!hasRequiredEquipment(mission)) {
             return rejectMission(
                     mission,
                     "Required equipment is missing or not operational.");
-            return rejectMission(
-                    mission, "Required equipment is missing or not operational.");
         }
 
         // Validate resources before consuming anything.
@@ -290,7 +290,6 @@ public class Colony {
                 return rejectMission(
                         mission,
                         "Selected agents do not satisfy mission requirements.");
-                return false;
             }
 
             // Consume resources only after validation and assignment.
@@ -348,7 +347,6 @@ public class Colony {
     public List<BaseMission> getFailedMissions() {
         return missionExecutor.getFailedMissions();
     }
-
 
     // Advance time for all missions that are currently in progress.
     public void advanceTime(int units) {
