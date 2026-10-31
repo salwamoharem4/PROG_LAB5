@@ -326,8 +326,7 @@ public class Colony {
         } catch (IllegalArgumentException | IllegalStateException ex) {
 
             if (mission.getStatus() != MissionStatus.COMPLETED
-                    && mission.getStatus() != MissionStatus.FAILED
-                    && mission.getStatus() != MissionStatus.CANCELLED) {
+                    && mission.getStatus() != MissionStatus.FAILED) {
 
                 return rejectMission(
                         mission,
@@ -375,8 +374,7 @@ public class Colony {
         MissionStatus status = activeNormalMission.getStatus();
 
         if (status == MissionStatus.COMPLETED
-                || status == MissionStatus.FAILED
-                || status == MissionStatus.CANCELLED) {
+                || status == MissionStatus.FAILED) {
 
             activeNormalMission = null;
         }

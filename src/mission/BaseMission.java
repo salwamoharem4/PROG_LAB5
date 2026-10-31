@@ -246,8 +246,7 @@ public abstract class BaseMission implements Mission {
         }
 
         if (status == MissionStatus.COMPLETED
-                || status == MissionStatus.FAILED
-                || status == MissionStatus.CANCELLED) {
+                || status == MissionStatus.FAILED) {
             throw new IllegalStateException("Mission has already ended");
         }
 

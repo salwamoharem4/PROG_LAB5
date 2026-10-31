@@ -6,5 +6,5 @@ public enum MissionStatus {
     IN_PROGRESS,    // Currently executing and counting time
     COMPLETED,      // Reached required duration successfully
     FAILED,       // Rejected or failed due to conditions
-    CANCELLED     //the mission was intentionally stopped by the colony or an authorized user.
+       //the mission was intentionally stopped by the colony or an authorized user.
 }
