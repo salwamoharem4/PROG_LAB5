@@ -126,4 +126,11 @@ public void rest(int amount) {
     public boolean isRobot() {
         return false;
     }
+   
+public static final int FATIGUE_PER_TIME_UNIT = 5;
+
+@Override
+public void advanceTime(int units) {
+    addFatigue(units * FATIGUE_PER_TIME_UNIT);   // clamps at 100 by itself
+}
 }

@@ -99,4 +99,10 @@ public void drainBattery(int amount) {
 
 
 
+public static final int BATTERY_DRAIN_PER_TIME_UNIT = 10;
+
+@Override
+public void advanceTime(int units) {
+    drainBattery(units * BATTERY_DRAIN_PER_TIME_UNIT);   // clamps at 0 by itself
+}
 }

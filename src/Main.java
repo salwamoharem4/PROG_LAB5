@@ -1,4 +1,7 @@
 import agent.Agent;
+import agent.human.Human;
+import agent.robot.Robot;
+import colony.Simulation;
 import agent.human.Engineer;
 import agent.human.HealthStatus;
 import agent.human.MedicalOfficer;
@@ -1093,6 +1096,334 @@ public class Main {
 
                 check("Null environmental condition is rejected",
                         nullConditionRejected,
+                        true);
+
+
+                // =====================================================
+                // SECTION 10: SIMULATION AND TIME MANAGEMENT
+                // =====================================================
+
+                System.out.println("\n===== 32. SIMULATION: CLOCK =====");
+
+                Colony clockColony = new Colony();
+                Simulation clockSim = new Simulation(clockColony);
+
+                check("Simulation exposes its colony",
+                        clockSim.getColony() == clockColony,
+                        true);
+
+                check("New simulation starts at cycle 0",
+                        clockSim.getCurrentCycle() == 0,
+                        true);
+
+                clockSim.advanceTime(3);
+
+                check("Clock advances by the requested units",
+                        clockSim.getCurrentCycle() == 3,
+                        true);
+
+                clockSim.advanceTime(2);
+
+                check("Clock accumulates across calls",
+                        clockSim.getCurrentCycle() == 5,
+                        true);
+
+                boolean zeroTimeRejected = false;
+                try {
+                        clockSim.advanceTime(0);
+                } catch (IllegalArgumentException ex) {
+                        zeroTimeRejected = true;
+                }
+
+                check("Zero time units are rejected",
+                        zeroTimeRejected,
+                        true);
+
+                boolean negativeTimeRejected = false;
+                try {
+                        clockSim.advanceTime(-1);
+                } catch (IllegalArgumentException ex) {
+                        negativeTimeRejected = true;
+                }
+
+                check("Negative time units are rejected",
+                        negativeTimeRejected,
+                        true);
+
+                check("Rejected time does not move the clock",
+                        clockSim.getCurrentCycle() == 5,
+                        true);
+
+                boolean nullColonyRejected = false;
+                try {
+                        new Simulation(null);
+                } catch (IllegalArgumentException ex) {
+                        nullColonyRejected = true;
+                }
+
+                check("Simulation without a colony is rejected",
+                        nullColonyRejected,
+                        true);
+
+
+                System.out.println("\n===== 33. SIMULATION: TIME AFFECTS ONLY WORKING AGENTS =====");
+
+                Colony wearColony = new Colony();
+
+                Scientist workingScientist = new Scientist(
+                        50, "Working Scientist", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                Rover workingRover = new Rover(
+                        51, "Working Rover", habitatA, 100);
+
+                Scientist idleScientist = new Scientist(
+                        52, "Idle Scientist", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                Rover idleRover = new Rover(
+                        53, "Idle Rover", habitatA, 100);
+
+                wearColony.addAgent(workingScientist);
+                wearColony.addAgent(workingRover);
+                wearColony.addAgent(idleScientist);
+                wearColony.addAgent(idleRover);
+
+                BaseMission wearMission = simpleMission(
+                        300,
+                        "Long Exploration",
+                        EnumSet.of(Capability.EXPLORE),
+                        10);
+
+                check("Wear mission starts",
+                        wearColony.startMission(
+                                wearMission,
+                                List.of(workingScientist, workingRover),
+                                false),
+                        true);
+
+                Simulation wearSim = new Simulation(wearColony);
+                wearSim.advanceTime(2);
+
+                check("Mission progresses by the elapsed time",
+                        wearMission.getElapsedTime() == 2,
+                        true);
+
+                check("Mission is still IN_PROGRESS before its duration",
+                        wearMission.getStatus() == MissionStatus.IN_PROGRESS,
+                        true);
+
+                check("Working human gains fatigue",
+                        workingScientist.getFatigueLevel()
+                                == 2 * Human.FATIGUE_PER_TIME_UNIT,
+                        true);
+
+                check("Working robot loses battery",
+                        workingRover.getBatteryLevel()
+                                == 100 - 2 * Robot.BATTERY_DRAIN_PER_TIME_UNIT,
+                        true);
+
+                check("Idle human gains no fatigue",
+                        idleScientist.getFatigueLevel() == 0,
+                        true);
+
+                check("Idle robot keeps its battery",
+                        idleRover.getBatteryLevel() == 100,
+                        true);
+
+
+                System.out.println("\n===== 34. SIMULATION: ROBOT RUNS OUT OF BATTERY =====");
+
+                Colony batteryColony = new Colony();
+
+                Scientist batteryScientist = new Scientist(
+                        54, "Battery Scientist", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                Rover weakRover = new Rover(
+                        55, "Weak Rover", habitatA, 25);
+
+                batteryColony.addAgent(batteryScientist);
+                batteryColony.addAgent(weakRover);
+
+                BaseMission batteryMission = simpleMission(
+                        301,
+                        "Mission With Weak Rover",
+                        EnumSet.of(Capability.EXPLORE),
+                        10);
+
+                batteryColony.startMission(
+                        batteryMission,
+                        List.of(batteryScientist, weakRover),
+                        false);
+
+                Simulation batterySim = new Simulation(batteryColony);
+
+                // 3 units drain 30%, which is more than the 25% available.
+                batterySim.advanceTime(3);
+
+                check("Battery never goes below zero",
+                        weakRover.getBatteryLevel() == 0,
+                        true);
+
+                check("Mission FAILS when a robot becomes unusable",
+                        batteryMission.getStatus() == MissionStatus.FAILED,
+                        true);
+
+                check("Battery failure reason is recorded",
+                        batteryMission.getFailureReason() != null
+                                && !batteryMission.getFailureReason().isBlank(),
+                        true);
+
+                check("Other agents are released after the failure",
+                        batteryScientist.isAvailable(),
+                        true);
+
+                check("Failed mission is tracked as failed",
+                        batteryColony.getFailedMissions().contains(batteryMission),
+                        true);
+
+                check("Normal-mission slot is freed after the failure",
+                        batteryColony.getActiveNormalMission() == null,
+                        true);
+
+
+                System.out.println("\n===== 35. SIMULATION: HUMAN BECOMES EXHAUSTED =====");
+
+                Colony fatigueColony = new Colony();
+
+                // One time unit before the limit is still usable, the next is not.
+                Scientist tiredScientist = new Scientist(
+                        56, "Tired Scientist", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class),
+                        Human.FATIGUE_LIMIT - 2 * Human.FATIGUE_PER_TIME_UNIT);
+
+                fatigueColony.addAgent(tiredScientist);
+
+                BaseMission fatigueMission = simpleMission(
+                        302,
+                        "Mission With Tired Scientist",
+                        EnumSet.of(Capability.EXPLORE),
+                        10);
+
+                fatigueColony.startMission(
+                        fatigueMission,
+                        List.of(tiredScientist),
+                        false);
+
+                Simulation fatigueSim = new Simulation(fatigueColony);
+
+                fatigueSim.advanceTime(1);
+
+                check("Human below the fatigue limit keeps working",
+                        fatigueMission.getStatus() == MissionStatus.IN_PROGRESS,
+                        true);
+
+                fatigueSim.advanceTime(1);
+
+                check("Mission FAILS when a human reaches the fatigue limit",
+                        fatigueMission.getStatus() == MissionStatus.FAILED,
+                        true);
+
+                check("Exhausted human is not available",
+                        tiredScientist.isAvailable(),
+                        false);
+
+
+                System.out.println("\n===== 36. SIMULATION: EMERGENCY MISSION AGENTS ALSO TIRE =====");
+
+                Colony emergencyColony = new Colony();
+
+                Scientist normalWorker = new Scientist(
+                        57, "Normal Worker", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                MedicalOfficer emergencyDoctor = new MedicalOfficer(
+                        58, "Emergency Doctor", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                emergencyColony.addAgent(normalWorker);
+                emergencyColony.addAgent(emergencyDoctor);
+
+                emergencyColony.startMission(
+                        simpleMission(
+                                303,
+                                "Normal Exploration",
+                                EnumSet.of(Capability.EXPLORE),
+                                10),
+                        List.of(normalWorker),
+                        false);
+
+                emergencyColony.startMission(
+                        simpleMission(
+                                304,
+                                "Emergency Treatment",
+                                EnumSet.of(Capability.MEDICAL),
+                                10),
+                        List.of(emergencyDoctor),
+                        true);
+
+                new Simulation(emergencyColony).advanceTime(1);
+
+                check("Normal-mission human gains fatigue",
+                        normalWorker.getFatigueLevel() == Human.FATIGUE_PER_TIME_UNIT,
+                        true);
+
+                check("Emergency-mission human also gains fatigue",
+                        emergencyDoctor.getFatigueLevel() == Human.FATIGUE_PER_TIME_UNIT,
+                        true);
+
+
+                System.out.println("\n===== 37. SIMULATION: COMPLETION RELEASES AGENTS =====");
+
+                Colony finishColony = new Colony();
+
+                Scientist finishScientist = new Scientist(
+                        59, "Finish Scientist", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                finishColony.addAgent(finishScientist);
+
+                BaseMission finishMission = simpleMission(
+                        305,
+                        "Short Mission",
+                        EnumSet.of(Capability.EXPLORE),
+                        3);
+
+                finishColony.startMission(
+                        finishMission,
+                        List.of(finishScientist),
+                        false);
+
+                Simulation finishSim = new Simulation(finishColony);
+                finishSim.advanceTime(3);
+
+                check("Mission COMPLETES when its duration is reached",
+                        finishMission.getStatus() == MissionStatus.COMPLETED,
+                        true);
+
+                check("Agent worked for the whole duration (fatigue applied)",
+                        finishScientist.getFatigueLevel()
+                                == 3 * Human.FATIGUE_PER_TIME_UNIT,
+                        true);
+
+                check("Agent is released after completion",
+                        finishScientist.isAvailable(),
+                        true);
+
+                int fatigueAfterCompletion = finishScientist.getFatigueLevel();
+
+                finishSim.advanceTime(1);
+
+                check("Released agent no longer tires as time passes",
+                        finishScientist.getFatigueLevel() == fatigueAfterCompletion,
                         true);
 
 
