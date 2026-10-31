@@ -15,7 +15,7 @@ import java.util.List;
 //Added Validation 
 //modified resolve so when patient is healed it realses the doctor that is assign to it 
 
-public class Medical extends emergency {
+public class Medical extends Emergency {
 private Human patient;
 private Facility medicalFacility;
 private int reqMedSupp=1;

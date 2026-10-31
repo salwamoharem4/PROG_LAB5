@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class emergency {
+public abstract class Emergency {
 
     private Location Emergencylocation;
     private final EmergencyType type;
@@ -19,7 +19,7 @@ public abstract class emergency {
 
 
 
-    public emergency(EmergencyType type , Location EmergencyLocation) {
+    public Emergency(EmergencyType type , Location EmergencyLocation) {
         this.type = type;
         this.Emergencylocation=EmergencyLocation;
     }

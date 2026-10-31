@@ -11,7 +11,7 @@ import java.util.List;
 // DON'T FORGET TO ADD RELEASE AFTER TIME DURATION
 // DON'T FORGET TO ADD RELEASE AFTER TIME DURATION
 
-public class Fire extends emergency {
+public class Fire extends Emergency {
     private Facility affectedFacility;
 
 

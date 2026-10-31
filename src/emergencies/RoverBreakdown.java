@@ -1,8 +1,6 @@
 package emergencies;
 
 import core.EmergencyType;
-import core.Location;
-import facilities.Habitat;
 import agent.BaseAgent;
 import agent.robot.Rover;
 import mission.BaseMission;
@@ -14,7 +12,7 @@ import java.util.List;
 // DON'T FORGET TO ADD RELEASE AFTER TIME DURATION
 
 
-public class RoverBreakdown extends emergency {
+public class RoverBreakdown extends Emergency {
 private Rover damagedRover;
 private int reqParts=5;
 
@@ -41,7 +39,7 @@ private int reqParts=5;
         List<BaseAgent> candidates = new ArrayList<>(candidateResponders);
         candidates.remove(this.damagedRover);
 
-        if(!dispatchTeam(candidateResponders)){
+        if(!dispatchTeam(candidates)){
             return false;
         }
         this.damagedRover.repair();

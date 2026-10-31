@@ -8,7 +8,7 @@ import resource.ResourceType;
 import java.util.List;
 
  // DON'T FORGET TO ADD RELEASE AFTER TIME DURATION
- public class OxygenLeak extends emergency {
+ public class OxygenLeak extends Emergency {
 
      private Facility affectedFacility;
      private int OxygenLoss;
