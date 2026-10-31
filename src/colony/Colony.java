@@ -8,12 +8,15 @@ import mission.MissionExecutor;
 import mission.MissionStatus;
 import resource.ResourceType;
 import agent.Agent;
+import environment.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
+//Added enviroment to Colony
+//Added a validation to check whether condition before starting mission,in startMission method.
+//setEnvironment method was Added.
 // Manages the colony's facilities, agents, resources, and missions.
 public class Colony {
 
@@ -25,6 +28,8 @@ public class Colony {
 
     // Manages mission execution and tracks registered missions.
     private final MissionExecutor missionExecutor = new MissionExecutor();
+    
+    private final Environment environment = new Environment();
 
     public Colony() {
         facilities = new ArrayList<>();
@@ -54,6 +59,9 @@ public class Colony {
     public List<Agent> getAgents() {
         return Collections.unmodifiableList(agents);
     }
+    public Environment getEnvironment() {
+    return environment;
+}
 
     // Calculate total resources in operational facilities.
     public int getTotalResources(ResourceType type) {
@@ -258,7 +266,10 @@ public class Colony {
             return rejectMission(
                     mission,
                     "Another normal mission is already active.");
-        }
+        }//Check environmental conditions
+        String envError = environment.canStartMission(mission);
+             if (envError != null) {
+               return rejectMission(mission, envError);} 
 
         // Validate selected agents.
         String agentError = validateAgents(mission, selectedAgents);
@@ -370,4 +381,13 @@ public class Colony {
             activeNormalMission = null;
         }
     }
+     // Change the colony environment 
+    //  In the set method, re-check ALL running missions.
+public void setEnvironmentCondition(EnvironmentCondition condition) {
+    environment.setCondition(condition);
+    for (BaseMission m : missionExecutor.getMissions()) {
+        environment.applyConditionToActiveMission(m);
+    }
+    updateActiveMission();     // frees the normal-mission slot if it just failed
+}
 }
