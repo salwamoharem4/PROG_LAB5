@@ -12,7 +12,8 @@ import java.util.List;
 
 
 // DON'T FORGET TO ADD RELEASE AFTER TIME DURATION
-
+//Added Validation 
+//modified resolve so when patient is healed it realses the doctor that is assign to it 
 
 public class Medical extends emergency {
 private Human patient;
@@ -21,6 +22,10 @@ private int reqMedSupp=1;
 
     public Medical(Facility medicalFacility,Human patient) {
         super(EmergencyType.MEDICAL_EMERGENCY, patient.getLocation());
+        if (medicalFacility == null) {
+            throw new IllegalArgumentException("Medical facility is required");
+        }
+        
         this.medicalFacility=medicalFacility;
         this.patient = patient;
         System.out.println("THIS HUMAN ["+ patient.getName() +"] REQUIRES IMMEDIATE MEDICAL CARE !!  ");
@@ -58,6 +63,7 @@ private int reqMedSupp=1;
         patient.improveHealth();
         markResolved();
         System.out.println("Patient Healed By Doctor : "+doctor.getName());
+        releaseResponders();
         return true;
     }
     public Human getPatient() {

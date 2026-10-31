@@ -16,6 +16,12 @@ import java.util.List;
 
      public OxygenLeak( Facility affectedFacility, int OxygenLoss) {
          super(EmergencyType.OXYGEN_LEAK, affectedFacility);
+          if (affectedFacility == null) {
+            throw new IllegalArgumentException("Affected facility is required");
+        }
+        if (OxygenLoss < 0) {
+            throw new IllegalArgumentException("Oxygen loss cannot be negative");
+        }
          this.affectedFacility = affectedFacility;
          this.OxygenLoss = OxygenLoss;
 
@@ -23,10 +29,13 @@ import java.util.List;
      }
 
      private void applyOxygenLoss(int oxygenLossAmount) {
+         if (oxygenLossAmount < 0) {
+        throw new IllegalArgumentException("Oxygen loss cannot be negative");
+    }
          int current = affectedFacility.getResourceAmount(ResourceType.OXYGEN);
          affectedFacility.consumeResource(ResourceType.OXYGEN, oxygenLossAmount);
 
-         int actualLost = current - affectedFacility.getResourceAmount(ResourceType.OXYGEN);
+         int actualLost = Math.min(oxygenLossAmount, current);   // can't lose more than exists
          this.totalOxygenLost += actualLost; // <-- 2. Add to running total!
 
          System.out.println("Oxygen leak in [" + affectedFacility.getName() + "]: lost "
