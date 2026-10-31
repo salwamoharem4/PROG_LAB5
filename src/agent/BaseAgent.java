@@ -4,7 +4,9 @@ import core.EmergencyType;
 import core.Location;
 import mission.Mission;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 // Contains the common fields and methods for all agents.
 public abstract class BaseAgent implements Agent {
@@ -12,7 +14,9 @@ public abstract class BaseAgent implements Agent {
     private final int id;
     private final String name;
     private Location location;
-    private boolean available = true;      // false while the agent is working on a mission
+    private boolean available = true; // false while the agent is working on a mission
+    private static List<Agent> allAgents = new ArrayList<>();
+
 
     protected BaseAgent(int id, String name, Location location) {
         if (id <= 0) {
@@ -30,6 +34,11 @@ public abstract class BaseAgent implements Agent {
         this.id = id;
         this.name = name.trim();
         this.location = location;
+        allAgents.add(this);
+    }
+
+    public static List<Agent> getAllAgents() {
+        return Collections.unmodifiableList(allAgents);
     }
 
     @Override
@@ -45,6 +54,10 @@ public abstract class BaseAgent implements Agent {
     @Override
     public Location getLocation() {
         return location;
+    }
+
+    public static void clearRegistry(){
+        allAgents.clear();
     }
 
     // Required by the Agent interface.

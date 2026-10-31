@@ -12,7 +12,7 @@ public class Scientist extends Human {
 //static so the variable belong to this class 
 //Now Every scientist has the same capabilities: RESEARCH and EXPLORE.
     private static final Set<Capability> CAPABILITIES =
-            Collections.unmodifiableSet(EnumSet.of(Capability.RESEARCH, Capability.EXPLORE));
+            Collections.unmodifiableSet(EnumSet.of(Capability.RESEARCH, Capability.EXPLORE,Capability.FIRE_RESPONSE));
 //EnumSet.of(Capability.RESEARCH, Capability.EXPLORE) creates a set contains explore and research,
 // Collections.unmodifiableSet doesnt allow modification to the set for example we cant now remove ar add to the set
     public Scientist(int id, String name, Location location,

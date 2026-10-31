@@ -1,5 +1,8 @@
 package emergencies;
 
+import agent.Agent;
+import agent.human.HealthStatus;
+import agent.human.Human;
 import core.EmergencyType;
 import facilities.Facility;
 import agent.BaseAgent;
@@ -21,8 +24,27 @@ public class Fire extends Emergency {
         this.affectedFacility.setOperationalStatus(false); // Lock down Facility
         this.affectedFacility.consumeResource(ResourceType.OXYGEN, 40); // increase oxygen consuming
         System.out.println( "FIRE OCCURED IN  : " + affectedFacility.getName() +"!!");
+        injureAllPersonell();
     }
+    private void  injureAllPersonell(){
+        for (Agent agent : BaseAgent.getAllAgents() ){
 
+            if(agent.getLocation()!=null&& agent.getLocation().getName().equalsIgnoreCase(affectedFacility.getName()) ){
+
+                    if (agent.isHuman()){
+                        Human human= (Human) agent;
+                        human.worsenHealth();
+                        System.out.println("⚠️ " + human.getName() + " was injured in the fire! Health is now: " + human.getHealthStatus());
+
+                        if(human.getHealthStatus() == HealthStatus.CRITICAL){
+                            new Medical (affectedFacility , human);  // For automation
+                        }
+                    }
+            }
+
+            }
+
+    }
 
     @Override
     public boolean resolve(List<BaseAgent> candidateResponders) {

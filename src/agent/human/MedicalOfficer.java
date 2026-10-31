@@ -11,7 +11,7 @@ import java.util.Set;
 public class MedicalOfficer extends Human {
 
     private static final Set<Capability> CAPABILITIES =
-            Collections.unmodifiableSet(EnumSet.of(Capability.MEDICAL));
+            Collections.unmodifiableSet(EnumSet.of(Capability.MEDICAL,Capability.FIRE_RESPONSE));
 
     public MedicalOfficer(int id, String name, Location location,
                           HealthStatus healthStatus, Set<Skill> skills, int fatigueLevel) {
