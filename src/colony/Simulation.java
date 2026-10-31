@@ -1,6 +1,4 @@
-
 package colony;
-
 import agent.Agent;
 import mission.BaseMission;
 import mission.MissionStatus;
@@ -31,45 +29,72 @@ public class Simulation {
         return currentCycle;
     }
 
-    // Advances simulation time by the specified number of time units.
+    // Advances simulation time one unit at a time.
     public void advanceTime(int units) {
         if (units <= 0) {
             throw new IllegalArgumentException("Time units must be positive");
         }
+        System.out.println(
+                "\n>>> ADVANCING SIMULATION TIME BY "
+                        + units + " UNITS <<<"
+        );
 
-        currentCycle += units;
+        // Process each time unit separately.
+        for (int i = 0; i < units; i++) {
+            currentCycle++;
+            System.out.println(
+                    "\n--- Simulation Cycle: " + currentCycle + " ---"
+            );
+            // Get missions that are currently in progress.
+            List<BaseMission> inProgressMissions = new ArrayList<>();
 
-        System.out.println("\n>>> ADVANCING SIMULATION TIME BY " + units + " UNITS (Current Cycle: " + currentCycle + ") <<<");
+            for (BaseMission mission : colony.getMissions()) {
 
-        // Get all missions that are currently in progress.
-        List<BaseMission> inProgressMissions = new ArrayList<>();
-
-        for (BaseMission m : colony.getMissions()) {
-            if (m.getStatus() == MissionStatus.IN_PROGRESS) {
-                inProgressMissions.add(m);
-            }
-        }
-
-        // Process each mission and its assigned agents.
-        for (BaseMission mission : inProgressMissions) {
-
-            // Create a copy to avoid problems if the original list changes.
-            List<Agent> teamCopy = new ArrayList<>(mission.getAssignedAgents());
-
-            for (Agent agent : teamCopy) {
-
-                // Update the agent's fatigue or battery.
-                agent.advanceTime(units);
-
-                // Check if the agent is still usable.
-                if (!agent.isUsable()) {
-                    mission.fail("Mission failed: Agent " + agent.getName() + " became unusable during operation.");
-                    break;
+                if (mission.getStatus() == MissionStatus.IN_PROGRESS) {
+                    inProgressMissions.add(mission);
                 }
             }
+
+            // Update the agents assigned to each active mission.
+            for (BaseMission mission : inProgressMissions) {
+
+                // Copy the list because fail() may release all agents.
+                List<Agent> teamCopy = new ArrayList<>(mission.getAssignedAgents());
+                for (Agent agent : teamCopy) {
+
+                    // Advance this agent by ONE time unit.
+                    agent.advanceTime(1);
+
+                    // Check whether the agent can continue working.
+                    if (!agent.isUsable()) { //3alshan law el sbb battery yb'a specific
+                        String reason;
+                        if (agent.isRobot() && agent.getBatteryLevel() == 0) {
+                            reason = "Mission failed: Robot "
+                                    + agent.getName()
+                                    + " ran out of battery.";
+                        } else {
+                            reason = "Mission failed: Agent "
+                                    + agent.getName()
+                                    + " became unusable during operation.";
+                        }
+                        mission.fail(reason);
+                        System.out.println(reason);
+                        break;
+                    }
+                }
+            }
+
+            // Advance all missions by ONE time unit.
+            // Failed missions should not progress.
+            colony.advanceTime(1);
+
+            System.out.println(
+                    "Cycle " + currentCycle + " completed."
+            );
         }
 
-        // Advance mission progress in the colony.
-        colony.advanceTime(units);
+        System.out.println(
+                "\n>>> SIMULATION TIME ADVANCED SUCCESSFULLY <<<"
+        );
     }
 }

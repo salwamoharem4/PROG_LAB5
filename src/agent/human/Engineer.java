@@ -23,9 +23,4 @@ public class Engineer extends Human {
         return CAPABILITIES;
     }
 
-    @Override
-    public boolean isRobot() {
-        return false;
-    }
-
 }

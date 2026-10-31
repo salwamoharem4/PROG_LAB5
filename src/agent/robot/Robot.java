@@ -55,11 +55,8 @@ public void drainBattery(int amount) {
         throw new IllegalArgumentException("Amount must be non-negative");
     }
 
-    if (amount > batteryLevel) {
-        throw new IllegalArgumentException("Not enough battery");
-    }
-
-    batteryLevel = batteryLevel - amount;
+    //GHAYERT HNA BDL THROW EXEPCTION SHOFO ANHY SAHHH
+    batteryLevel = Math.max(0,batteryLevel - amount);
 }
 
 

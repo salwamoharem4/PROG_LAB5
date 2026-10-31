@@ -49,9 +49,6 @@ public interface Agent {
     // Release the agent when the mission ends.
     void release();
 
-
-
-
     boolean isHuman ();
     boolean isRobot();
 
