@@ -25,6 +25,7 @@ public class Fire extends Emergency {
         this.affectedFacility.consumeResource(ResourceType.OXYGEN, 40); // increase oxygen consuming
         System.out.println( "FIRE OCCURED IN  : " + affectedFacility.getName() +"!!");
         injureAllPersonell();
+        affectedFacility.setOperationalStatus(false);
     }
     private void  injureAllPersonell(){
         for (Agent agent : BaseAgent.getAllAgents() ){

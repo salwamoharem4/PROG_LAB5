@@ -6,6 +6,8 @@ import agent.BaseAgent;
 import resource.ResourceType;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+
 //made oxygenleak to consume spareparts as they asked in section 5
  // DON'T FORGET TO ADD RELEASE AFTER TIME DURATION
  public class OxygenLeak extends Emergency {
@@ -46,7 +48,9 @@ import java.util.List;
 
          int actualLost = Math.min(oxygenLossAmount, current);   // can't lose more than exists
          this.totalOxygenLost += actualLost; // <-- 2. Add to running total!
-
+        if(affectedFacility.getResourceAmount(ResourceType.OXYGEN) == 0){
+            throw new IllegalStateException("Facility Is Now NON-OPERATIONAL");
+        }
          System.out.println("Oxygen leak in [" + affectedFacility.getName() + "]: lost "
                  + actualLost + " units. Total lost so far: " + this.totalOxygenLost);
      }
