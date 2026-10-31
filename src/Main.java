@@ -1,4 +1,3 @@
-
 import agent.Agent;
 import agent.human.Engineer;
 import agent.human.HealthStatus;
@@ -23,6 +22,8 @@ import mission.MissionStatus;
 import mission.missiontype.MissionType;
 
 import colony.Colony;
+import environment.Environment;
+import environment.EnvironmentCondition;
 import resource.ResourceType;
 
 import java.util.EnumSet;
@@ -806,6 +807,292 @@ public class Main {
 
                 check("Rejected mission is tracked as failed",
                         unsuitableColony.getFailedMissions().contains(unsuitableMission),
+                        true);
+
+
+                // =====================================================
+                // SECTION 8: ENVIRONMENT TESTS
+                // NOTE: assumes Colony has setEnvironmentCondition(EnvironmentCondition).
+                // If your method has another name, replace it in this section only.
+                // =====================================================
+
+                System.out.println("\n===== 26. ENVIRONMENT: DUST STORM BLOCKS EXPLORATION =====");
+
+                Colony dustColony = new Colony();
+
+                Scientist dustScientist = new Scientist(
+                        40, "Dust Scientist", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                dustColony.addAgent(dustScientist);
+                dustColony.setEnvironmentCondition(EnvironmentCondition.DUST);
+
+                BaseMission dustExploration = simpleMission(
+                        200,
+                        "Exploration During Dust Storm",
+                        EnumSet.of(Capability.EXPLORE),
+                        3);
+
+                check("Exploration mission is rejected during a dust storm",
+                        dustColony.startMission(
+                                dustExploration,
+                                List.of(dustScientist),
+                                false),
+                        false);
+
+                check("Rejected exploration mission becomes FAILED",
+                        dustExploration.getStatus() == MissionStatus.FAILED,
+                        true);
+
+                check("Failure reason names the dust storm",
+                        "Surface operations are not allowed during a dust storm."
+                                .equals(dustExploration.getFailureReason()),
+                        true);
+
+                check("Rejected mission never becomes the active mission",
+                        dustColony.getActiveNormalMission() == null,
+                        true);
+
+                check("Agent stays available after environmental rejection",
+                        dustScientist.isAvailable(),
+                        true);
+
+
+                System.out.println("\n===== 27. ENVIRONMENT: NORMAL CONDITIONS ALLOW EXPLORATION =====");
+
+                dustColony.setEnvironmentCondition(EnvironmentCondition.NORMAL);
+
+                BaseMission afterStorm = simpleMission(
+                        201,
+                        "Exploration After Storm",
+                        EnumSet.of(Capability.EXPLORE),
+                        3);
+
+                check("Exploration mission is accepted once conditions are NORMAL",
+                        dustColony.startMission(
+                                afterStorm,
+                                List.of(dustScientist),
+                                false),
+                        true);
+
+
+                System.out.println("\n===== 28. ENVIRONMENT: DUST STORM FAILS A RUNNING MISSION =====");
+
+                Colony runningColony = new Colony();
+
+                Scientist runningScientist = new Scientist(
+                        41, "Running Scientist", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                runningColony.addAgent(runningScientist);
+
+                BaseMission runningExploration = simpleMission(
+                        202,
+                        "Exploration Caught In Storm",
+                        EnumSet.of(Capability.EXPLORE),
+                        5);
+
+                check("Exploration mission starts under NORMAL conditions",
+                        runningColony.startMission(
+                                runningExploration,
+                                List.of(runningScientist),
+                                false),
+                        true);
+
+                runningColony.setEnvironmentCondition(EnvironmentCondition.DUST);
+
+                check("Running exploration mission FAILS when a dust storm starts",
+                        runningExploration.getStatus() == MissionStatus.FAILED,
+                        true);
+
+                check("Storm failure reason is recorded",
+                        runningExploration.getFailureReason() != null
+                                && !runningExploration.getFailureReason().isBlank(),
+                        true);
+
+                check("Agent is released after the storm failure",
+                        runningScientist.isAvailable(),
+                        true);
+
+                check("Normal-mission slot is freed after the storm failure",
+                        runningColony.getActiveNormalMission() == null,
+                        true);
+
+
+                System.out.println("\n===== 29. ENVIRONMENT: DUST STORM DOES NOT AFFECT REPAIR =====");
+
+                Colony repairColony = new Colony();
+
+                Engineer repairEngineer = new Engineer(
+                        42, "Repair Engineer", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                repairColony.addAgent(repairEngineer);
+                repairColony.setEnvironmentCondition(EnvironmentCondition.DUST);
+
+                BaseMission repairUnderDust = createMission(
+                        203,
+                        "Repair During Dust Storm",
+                        MissionType.REPAIR,
+                        3,
+                        EnumSet.of(Capability.REPAIR),
+                        EnumSet.noneOf(Skill.class),
+                        0,
+                        new EnumMap<>(ResourceType.class),
+                        List.of());
+
+                check("Repair mission is not blocked by a dust storm",
+                        repairColony.startMission(
+                                repairUnderDust,
+                                List.of(repairEngineer),
+                                false),
+                        true);
+
+                Colony steadyColony = new Colony();
+
+                Engineer steadyEngineer = new Engineer(
+                        43, "Steady Engineer", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                steadyColony.addAgent(steadyEngineer);
+
+                BaseMission steadyRepair = createMission(
+                        204,
+                        "Repair Running Through Storm",
+                        MissionType.REPAIR,
+                        5,
+                        EnumSet.of(Capability.REPAIR),
+                        EnumSet.noneOf(Skill.class),
+                        0,
+                        new EnumMap<>(ResourceType.class),
+                        List.of());
+
+                steadyColony.startMission(
+                        steadyRepair,
+                        List.of(steadyEngineer),
+                        false);
+
+                steadyColony.setEnvironmentCondition(EnvironmentCondition.DUST);
+
+                check("Running repair mission survives a dust storm",
+                        steadyRepair.getStatus() == MissionStatus.IN_PROGRESS,
+                        true);
+
+
+                System.out.println("\n===== 30. ENVIRONMENT: COMMUNICATION DISRUPTION =====");
+
+                Colony commColony = new Colony();
+
+                Drone commDrone = new Drone(
+                        44, "Comm Drone", habitatA, 90);
+
+                Rover commRover = new Rover(
+                        45, "Comm Rover", habitatA, 90);
+
+                Engineer commEngineer = new Engineer(
+                        46, "Comm Engineer", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                commColony.addAgent(commDrone);
+                commColony.addAgent(commRover);
+                commColony.addAgent(commEngineer);
+
+                commColony.setEnvironmentCondition(
+                        EnvironmentCondition.COMMUNICATION_DISRUPTION);
+
+                BaseMission droneMission = simpleMission(
+                        205,
+                        "Drone Survey",
+                        EnumSet.of(Capability.AERIAL_RECON),
+                        3);
+
+                check("Drone mission is rejected during communication disruption",
+                        commColony.startMission(
+                                droneMission,
+                                List.of(commDrone),
+                                false),
+                        false);
+
+                check("Rejected drone mission becomes FAILED",
+                        droneMission.getStatus() == MissionStatus.FAILED,
+                        true);
+
+                BaseMission rescueMission = createMission(
+                        206,
+                        "Rescue Mission",
+                        MissionType.RESCUE,
+                        3,
+                        EnumSet.of(Capability.RESCUE),
+                        EnumSet.noneOf(Skill.class),
+                        0,
+                        new EnumMap<>(ResourceType.class),
+                        List.of());
+
+                check("Rescue mission is rejected during communication disruption",
+                        commColony.startMission(
+                                rescueMission,
+                                List.of(commRover),
+                                false),
+                        false);
+
+                BaseMission commRepair = createMission(
+                        207,
+                        "Repair During Communication Disruption",
+                        MissionType.REPAIR,
+                        3,
+                        EnumSet.of(Capability.REPAIR),
+                        EnumSet.noneOf(Skill.class),
+                        0,
+                        new EnumMap<>(ResourceType.class),
+                        List.of());
+
+                check("Repair mission is not blocked by communication disruption",
+                        commColony.startMission(
+                                commRepair,
+                                List.of(commEngineer),
+                                false),
+                        true);
+
+
+                System.out.println("\n===== 31. ENVIRONMENT: AGENT CONTROL RULES =====");
+
+                Environment environment = new Environment();
+
+                check("New environment starts under NORMAL conditions",
+                        environment.getCurrentCondition() == EnvironmentCondition.NORMAL,
+                        true);
+
+                environment.setCondition(EnvironmentCondition.COMMUNICATION_DISRUPTION);
+
+                check("Drone cannot be controlled during communication disruption",
+                        environment.canOperateAgent(commDrone),
+                        false);
+
+                check("Rover can still be operated during communication disruption",
+                        environment.canOperateAgent(commRover),
+                        true);
+
+                environment.setCondition(EnvironmentCondition.NORMAL);
+
+                check("Drone can be controlled again under NORMAL conditions",
+                        environment.canOperateAgent(commDrone),
+                        true);
+
+                boolean nullConditionRejected = false;
+
+                try {
+                        environment.setCondition(null);
+                } catch (IllegalArgumentException ex) {
+                        nullConditionRejected = true;
+                }
+
+                check("Null environmental condition is rejected",
+                        nullConditionRejected,
                         true);
 
 
