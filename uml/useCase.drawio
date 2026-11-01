@@ -1,0 +1,169 @@
+<mxfile host="65bd71144e">
+    <diagram id="uc2" name="Use Case Diagram">
+        <mxGraphModel dx="799" dy="522" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="950" pageHeight="1200" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="sys" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;dashed=1;verticalAlign=top;fontStyle=1;strokeColor=#666666;" value="MARS-OPS colony system" vertex="1">
+                    <mxGeometry height="1100" width="720" x="160" y="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="op" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fontStyle=1;" value="Colony Operator" vertex="1">
+                    <mxGeometry height="80" width="40" x="50" y="340" as="geometry"/>
+                </mxCell>
+                <mxCell id="eop" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fontStyle=1;" value="Emergency Operator" vertex="1">
+                    <mxGeometry height="80" width="40" x="50" y="870" as="geometry"/>
+                </mxCell>
+                <mxCell id="u1" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Manage agents" vertex="1">
+                    <mxGeometry height="50" width="220" x="190" y="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="u2" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Manage facilities and equipment" vertex="1">
+                    <mxGeometry height="50" width="220" x="190" y="115" as="geometry"/>
+                </mxCell>
+                <mxCell id="u3" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Monitor resources" vertex="1">
+                    <mxGeometry height="50" width="220" x="190" y="175" as="geometry"/>
+                </mxCell>
+                <mxCell id="u4" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Submit mission" vertex="1">
+                    <mxGeometry height="50" width="220" x="190" y="255" as="geometry"/>
+                </mxCell>
+                <mxCell id="u5" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Monitor missions" vertex="1">
+                    <mxGeometry height="50" width="220" x="190" y="355" as="geometry"/>
+                </mxCell>
+                <mxCell id="u6" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Inspect mission outcomes" vertex="1">
+                    <mxGeometry height="50" width="220" x="190" y="415" as="geometry"/>
+                </mxCell>
+                <mxCell id="u7" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Advance simulation time" vertex="1">
+                    <mxGeometry height="50" width="220" x="190" y="495" as="geometry"/>
+                </mxCell>
+                <mxCell id="u8" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Monitor environmental conditions" vertex="1">
+                    <mxGeometry height="50" width="220" x="190" y="575" as="geometry"/>
+                </mxCell>
+                <mxCell id="u9" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Change environmental condition" vertex="1">
+                    <mxGeometry height="50" width="220" x="190" y="635" as="geometry"/>
+                </mxCell>
+                <mxCell id="u10" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Generate colony status report" vertex="1">
+                    <mxGeometry height="50" width="220" x="190" y="695" as="geometry"/>
+                </mxCell>
+                <mxCell id="t1" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Trigger emergency" vertex="1">
+                    <mxGeometry height="50" width="220" x="190" y="815" as="geometry"/>
+                </mxCell>
+                <mxCell id="t2" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Inspect emergency outcomes" vertex="1">
+                    <mxGeometry height="50" width="220" x="190" y="935" as="geometry"/>
+                </mxCell>
+                <mxCell id="c1" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Check capability" vertex="1">
+                    <mxGeometry height="44" width="190" x="450" y="198" as="geometry"/>
+                </mxCell>
+                <mxCell id="c2" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Check resources" vertex="1">
+                    <mxGeometry height="44" width="190" x="450" y="238" as="geometry"/>
+                </mxCell>
+                <mxCell id="c3" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Check environment" vertex="1">
+                    <mxGeometry height="44" width="190" x="450" y="278" as="geometry"/>
+                </mxCell>
+                <mxCell id="c4" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Assign mission" vertex="1">
+                    <mxGeometry height="44" width="190" x="450" y="318" as="geometry"/>
+                </mxCell>
+                <mxCell id="c5" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Execute mission" vertex="1">
+                    <mxGeometry height="44" width="190" x="450" y="478" as="geometry"/>
+                </mxCell>
+                <mxCell id="c6" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Apply agent wear" vertex="1">
+                    <mxGeometry height="44" width="190" x="450" y="528" as="geometry"/>
+                </mxCell>
+                <mxCell id="h" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Handle emergency" vertex="1">
+                    <mxGeometry height="44" width="190" x="450" y="818" as="geometry"/>
+                </mxCell>
+                <mxCell id="h1" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Check responder availability" vertex="1">
+                    <mxGeometry height="50" width="180" x="680" y="750" as="geometry"/>
+                </mxCell>
+                <mxCell id="h2" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Consume response resources" vertex="1">
+                    <mxGeometry height="50" width="180" x="680" y="800" as="geometry"/>
+                </mxCell>
+                <mxCell id="x1" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Oxygen leak" vertex="1">
+                    <mxGeometry height="50" width="180" x="680" y="870" as="geometry"/>
+                </mxCell>
+                <mxCell id="x2" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Fire" vertex="1">
+                    <mxGeometry height="50" width="180" x="680" y="920" as="geometry"/>
+                </mxCell>
+                <mxCell id="x3" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Rover breakdown" vertex="1">
+                    <mxGeometry height="50" width="180" x="680" y="970" as="geometry"/>
+                </mxCell>
+                <mxCell id="x4" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Medical emergency" vertex="1">
+                    <mxGeometry height="50" width="180" x="680" y="1020" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1" edge="1" parent="1" source="op" style="edgeStyle=none;html=1;fontSize=9;endArrow=none;" target="u1" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2" edge="1" parent="1" source="op" style="edgeStyle=none;html=1;fontSize=9;endArrow=none;" target="u2" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3" edge="1" parent="1" source="op" style="edgeStyle=none;html=1;fontSize=9;endArrow=none;" target="u3" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4" edge="1" parent="1" source="op" style="edgeStyle=none;html=1;fontSize=9;endArrow=none;" target="u4" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5" edge="1" parent="1" source="op" style="edgeStyle=none;html=1;fontSize=9;endArrow=none;" target="u5" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6" edge="1" parent="1" source="op" style="edgeStyle=none;html=1;fontSize=9;endArrow=none;" target="u6" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7" edge="1" parent="1" source="op" style="edgeStyle=none;html=1;fontSize=9;endArrow=none;" target="u7" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e8" edge="1" parent="1" source="op" style="edgeStyle=none;html=1;fontSize=9;endArrow=none;" target="u8" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e9" edge="1" parent="1" source="op" style="edgeStyle=none;html=1;fontSize=9;endArrow=none;" target="u9" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e10" edge="1" parent="1" source="op" style="edgeStyle=none;html=1;fontSize=9;endArrow=none;" target="u10" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e11" edge="1" parent="1" source="eop" style="edgeStyle=none;html=1;fontSize=9;endArrow=none;" target="t1" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e12" edge="1" parent="1" source="eop" style="edgeStyle=none;html=1;fontSize=9;endArrow=none;" target="t2" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e13" edge="1" parent="1" source="u4" style="edgeStyle=none;html=1;fontSize=9;dashed=1;endArrow=open;endFill=0;" target="c1" value="«include»">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e14" edge="1" parent="1" source="u4" style="edgeStyle=none;html=1;fontSize=9;dashed=1;endArrow=open;endFill=0;" target="c2" value="«include»">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e15" edge="1" parent="1" source="u4" style="edgeStyle=none;html=1;fontSize=9;dashed=1;endArrow=open;endFill=0;" target="c3" value="«include»">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e16" edge="1" parent="1" source="u4" style="edgeStyle=none;html=1;fontSize=9;dashed=1;endArrow=open;endFill=0;" target="c4" value="«include»">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e17" edge="1" parent="1" source="u7" style="edgeStyle=none;html=1;fontSize=9;dashed=1;endArrow=open;endFill=0;" target="c5" value="«include»">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e18" edge="1" parent="1" source="u7" style="edgeStyle=none;html=1;fontSize=9;dashed=1;endArrow=open;endFill=0;" target="c6" value="«include»">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e19" edge="1" parent="1" source="t1" style="edgeStyle=none;html=1;fontSize=9;dashed=1;endArrow=open;endFill=0;" target="h" value="«include»">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e20" edge="1" parent="1" source="h" style="edgeStyle=none;html=1;fontSize=9;dashed=1;endArrow=open;endFill=0;" target="h1" value="«include»">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e21" edge="1" parent="1" source="h" style="edgeStyle=none;html=1;fontSize=9;dashed=1;endArrow=open;endFill=0;" target="h2" value="«include»">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e22" edge="1" parent="1" source="x1" style="edgeStyle=none;html=1;fontSize=9;endArrow=block;endFill=0;" target="h" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e23" edge="1" parent="1" source="x2" style="edgeStyle=none;html=1;fontSize=9;endArrow=block;endFill=0;" target="h" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e24" edge="1" parent="1" source="x3" style="edgeStyle=none;html=1;fontSize=9;endArrow=block;endFill=0;" target="h" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e25" edge="1" parent="1" source="x4" style="edgeStyle=none;html=1;fontSize=9;endArrow=block;endFill=0;" target="h" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

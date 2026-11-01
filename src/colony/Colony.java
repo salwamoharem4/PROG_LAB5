@@ -8,8 +8,10 @@ import mission.MissionExecutor;
 import mission.MissionStatus;
 import resource.ResourceType;
 import agent.Agent;
+import agent.BaseAgent;
+import emergencies.Emergency;
 import environment.*;
-
+import core.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.Map;
 //Added a validation to check whether condition before starting mission,in startMission method.
 //setEnvironment method was Added.
 // Manages the colony's facilities, agents, resources, and missions.
+//added colonyprintreport and handles emergency 
 public class Colony {
 
     private final List<Facility> facilities;
@@ -388,4 +391,61 @@ public void setEnvironmentCondition(EnvironmentCondition condition) {
     }
     updateActiveMission();     // frees the normal-mission slot if it just failed
 }
+  // check the capability 
+   public boolean canHandleEmergency(EmergencyType type) {
+    if (type == null) {
+        return false;
+    }
+
+    for (Agent agent : agents) {
+        if (agent.isAvailable() && agent.canHandle(type)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+// Handles an emergency by dispatching available responders.
+public boolean handleEmergency(Emergency emergency) {
+    if (emergency == null) {
+        return false;
+    }
+
+    List<BaseAgent> responders = new ArrayList<>();
+
+    for (Agent agent : agents) {
+        if (agent instanceof BaseAgent) {
+            responders.add((BaseAgent) agent);
+        }
+    }
+
+    return emergency.resolve(responders);
+}
+    // Produces a comprehensive status report of the colony (Section 5.1 & 11.6).
+    public void printStatusReport() {
+        System.out.println("\n========== MARS COLONY STATUS REPORT ==========");
+        System.out.println("Environment Condition: " + environment.getCurrentCondition());
+        System.out.println("\nFacilities (" + facilities.size() + " total):");
+        for (Facility f : facilities) {
+            System.out.println(" - " + f.getName() + " [" + f.getFacility() + "] "
+                    + (f.isOperational() ? "OPERATIONAL" : "NON-OPERATIONAL")
+                    + " at " + f.getLocation());
+        }
+
+        System.out.println("\nColony-wide Resource Totals (Operational facilities only):");
+        for (ResourceType type : ResourceType.values()) {
+            int amount = getTotalResources(type);
+            System.out.println(" - " + type + ": " + amount);
+        }
+
+        System.out.println("\nPersonnel & Robotic Units (" + agents.size() + " total):");
+        for (Agent a : agents) {
+            System.out.println(" - " + a.getName() + " | Location: " + a.getLocation().getName()
+                    + " | Available: " + a.isAvailable());
+        }
+
+        System.out.println("\nActive Mission: "
+                + (activeNormalMission != null ? activeNormalMission.getName() + " [" + activeNormalMission.getStatus() + "]" : "None"));
+        System.out.println("===============================================\n");
+    }
 }

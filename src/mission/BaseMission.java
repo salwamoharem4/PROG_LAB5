@@ -45,9 +45,11 @@ public abstract class BaseMission implements Mission {
         if (requiredCapabilities == null || requiredCapabilities.contains(null)
                 || requiredSkills == null || requiredSkills.contains(null)) {
             throw new IllegalArgumentException("Invalid requirements");
-        }
+        }//List.of() and List.of(scanner) create immutable Java lists. 
+        // Calling .contains(null) on these lists throws a NullPointerException because immutable lists don't allow null elements.
+        //
         if (requiredResources == null || requiredEquipment == null
-                || requiredEquipment.contains(null)) {
+                || requiredEquipment.stream().anyMatch(e -> e == null)/* to prevent NullPointerException error*/) {
             throw new IllegalArgumentException("Invalid resources or equipment");
         }
         for (Integer amount : requiredResources.values()) {

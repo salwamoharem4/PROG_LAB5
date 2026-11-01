@@ -1,0 +1,1448 @@
+import agent.Agent;
+import agent.human.Human;
+import agent.robot.Robot;
+import colony.Simulation;
+import agent.human.Engineer;
+import agent.human.HealthStatus;
+import agent.human.MedicalOfficer;
+import agent.human.Scientist;
+import agent.robot.Drone;
+import agent.robot.RepairRobot;
+import agent.robot.Rover;
+
+import core.Capability;
+import core.EmergencyType;
+import core.Location;
+import core.Skill;
+import core.Surface;
+import emergencies.*;
+import mission.missiontype.*;
+
+import facilities.Equipment;
+import facilities.Habitat;
+
+import mission.BaseMission;
+import mission.Mission;
+import mission.MissionStatus;
+import mission.missiontype.MissionType;
+
+import colony.Colony;
+import environment.Environment;
+import environment.EnvironmentCondition;
+import resource.ResourceType;
+
+import java.util.EnumSet;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+public class TestMain {
+
+        static int failures = 0;
+
+        static void check(String label, boolean actual, boolean expected) {
+                boolean ok = actual == expected;
+
+                if (!ok) {
+                        failures++;
+                }
+
+                System.out.println((ok ? "PASS " : "FAIL ") + label
+                        + " | Expected: " + expected + ", Actual: " + actual);
+        }
+
+        // Original helper for testing agent capabilities.
+        static Mission mission(
+                Set<Capability> caps,
+                Set<Skill> skills,
+                int battery) {
+
+                return new Mission() {
+                        public Set<Capability> getRequiredCapabilities() {
+                                return caps;
+                        }
+
+                        public Set<Skill> getRequiredSkills() {
+                                return skills;
+                        }
+
+                        public int getRequiredBattery() {
+                                return battery;
+                        }
+                };
+        }
+
+        // Creates a concrete mission for Colony and BaseMission tests.
+        static BaseMission createMission(
+                int id,
+                String name,
+                MissionType type,
+                int duration,
+                Set<Capability> caps,
+                Set<Skill> skills,
+                int battery,
+                Map<ResourceType, Integer> resources,
+                List<Equipment> equipment) {
+
+                // BaseMission uses EnumMap internally, so pass an EnumMap
+                // even when the mission does not require resources.
+                EnumMap<ResourceType, Integer> resourceCopy =
+                        new EnumMap<>(ResourceType.class);
+
+                resourceCopy.putAll(resources);
+
+                return new BaseMission(
+                        id,
+                        name,
+                        type,
+                        MissionStatus.PENDING,
+                        duration,
+                        0,
+                        null,
+                        caps,
+                        skills,
+                        battery,
+                        resourceCopy,
+                        () -> "Habitat A",
+                        new java.util.ArrayList<>(equipment),
+                        new java.util.ArrayList<>()
+                ) {
+                };
+        }
+
+        static BaseMission simpleMission(
+                int id,
+                String name,
+                Set<Capability> caps,
+                int duration) {
+
+                return createMission(
+                        id,
+                        name,
+                        MissionType.EXPLORATION,
+                        duration,
+                        caps,
+                        EnumSet.noneOf(Skill.class),
+                        0,
+                        new EnumMap<>(ResourceType.class),
+                        List.of()
+                );
+        }
+
+        public static void main(String[] args) {
+
+                Location habitatA = () -> "Habitat A";
+
+                // Create agents
+                Scientist sci = new Scientist(
+                        1, "Dr. Sara", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.of(Skill.GEOLOGY), 10);
+
+                Engineer eng = new Engineer(
+                        2, "Omar", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.of(Skill.MECHANICAL), 20);
+
+                MedicalOfficer med = new MedicalOfficer(
+                        3, "Dr. Lina", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.of(Skill.FIRST_AID), 0);
+
+                Rover rover = new Rover(
+                        4, "Rover-1", habitatA,
+                        80);
+
+                RepairRobot fixer = new RepairRobot(
+                        5, "Fixer-1", habitatA,
+                        60);
+
+                Drone drone = new Drone(
+                        6, "Drone-1", habitatA,
+                        5);
+
+                // Create missions
+                Mission explore = mission(
+                        EnumSet.of(Capability.EXPLORE),
+                        EnumSet.of(Skill.GEOLOGY),
+                        30);
+
+                Mission repair = mission(
+                        EnumSet.of(Capability.REPAIR),
+                        EnumSet.noneOf(Skill.class),
+                        10);
+
+                Mission aerialMission = mission(
+                        EnumSet.of(Capability.AERIAL_RECON),
+                        EnumSet.noneOf(Skill.class),
+                        30);
+
+                System.out.println("\n===== 1. CAPABILITY TESTS =====");
+
+                check("Scientist can explore",
+                        sci.canPerform(explore), true);
+
+                check("Rover can explore",
+                        rover.canPerform(explore), true);
+
+                check("Engineer cannot explore",
+                        eng.canPerform(explore), false);
+
+                check("Drone cannot explore",
+                        drone.canPerform(explore), false);
+
+                check("Scientist cannot repair",
+                        sci.canPerform(repair), false);
+
+
+                System.out.println("\n===== 2. SKILL TESTS =====");
+
+                Scientist noSkill = new Scientist(
+                        7, "Newbie", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                check("Scientist with GEOLOGY can explore",
+                        sci.canPerform(explore), true);
+
+                check("Scientist without GEOLOGY cannot explore",
+                        noSkill.canPerform(explore), false);
+
+
+                System.out.println("\n===== 3. BATTERY TESTS =====");
+
+                check("Rover battery 80 is enough for mission requiring 30",
+                        rover.canPerform(explore), true);
+
+                check("Drone battery 5 is not enough for mission requiring 30",
+                        drone.canPerform(aerialMission), false);
+
+
+                System.out.println("\n===== 4. TEAM CAPABILITY TESTS =====");
+
+                check("Scientist and Rover team covers exploration",
+                        explore.isCoveredBy(List.of(sci, rover)), true);
+
+                check("Engineer alone does not cover exploration",
+                        explore.isCoveredBy(List.of(eng)), false);
+
+                check("Empty team does not cover exploration",
+                        explore.isCoveredBy(List.of()), false);
+
+
+                System.out.println("\n===== 5. AGENT AVAILABILITY TESTS =====");
+
+                eng.assign();
+
+                check("Assigned engineer is not available",
+                        eng.isAvailable(), false);
+
+                check("Assigned engineer cannot handle emergency",
+                        eng.canHandle(EmergencyType.OXYGEN_LEAK), false);
+
+                eng.release();
+
+                check("Released engineer is available again",
+                        eng.isAvailable(), true);
+
+
+                System.out.println("\n===== 6. EMERGENCY TESTS =====");
+
+                check("Engineer handles oxygen leak",
+                        eng.canHandle(EmergencyType.OXYGEN_LEAK), true);
+
+                check("Repair robot handles oxygen leak",
+                        fixer.canHandle(EmergencyType.OXYGEN_LEAK), true);
+
+                check("Medical officer handles medical emergency",
+                        med.canHandle(EmergencyType.MEDICAL_EMERGENCY), true);
+
+                check("Rover cannot handle oxygen leak",
+                        rover.canHandle(EmergencyType.OXYGEN_LEAK), false);
+
+
+                System.out.println("\n===== 7. AGENT USABILITY TESTS =====");
+
+                fixer.breakDown();
+
+                check("Broken robot is not available",
+                        fixer.isAvailable(), false);
+
+                fixer.repair();
+
+                check("Repaired robot is available",
+                        fixer.isAvailable(), true);
+
+                // Sara starts with fatigue 10, so add 90 to reach 100.
+                sci.addFatigue(90);
+
+                check("Exhausted scientist is not available",
+                        sci.isAvailable(), false);
+
+
+                System.out.println("\n===== 8. HEALTH TESTS =====");
+
+                med.worsenHealth();
+                med.worsenHealth();
+
+                check("Critical medical officer is not usable",
+                        med.isUsable(), false);
+
+                med.improveHealth();
+                med.improveHealth();
+
+                check("Treated medical officer is usable again",
+                        med.isUsable(), true);
+
+
+                System.out.println("\n===== 9. MOVEMENT AND BREAKDOWN TESTS =====");
+
+                rover.moveTo(Surface.INSTANCE);
+                rover.breakDown();
+
+                check("Broken rover remains on the surface",
+                        rover.getLocation() == Surface.INSTANCE, true);
+
+
+                // =====================================================
+                // SECTION 6: MISSION MANAGEMENT TESTS
+                // =====================================================
+
+                System.out.println("\n===== 10. SECTION 6: MISSION ADMISSION =====");
+
+                // Use fresh agents because Sara and Rover were modified above.
+                Scientist scientist1 = new Scientist(
+                        10, "Scientist-1", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.of(Skill.GEOLOGY), 0);
+
+                Engineer engineer1 = new Engineer(
+                        11, "Engineer-1", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.of(Skill.MECHANICAL), 0);
+
+                MedicalOfficer doctor1 = new MedicalOfficer(
+                        12, "Doctor-1", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.of(Skill.FIRST_AID), 0);
+
+                Colony colony = new Colony();
+
+                colony.addAgent(scientist1);
+                colony.addAgent(engineer1);
+                colony.addAgent(doctor1);
+
+                BaseMission normalMission = simpleMission(
+                        100,
+                        "Exploration Mission",
+                        EnumSet.of(Capability.EXPLORE),
+                        5);
+
+                check("Suitable mission is accepted",
+                        colony.startMission(
+                                normalMission,
+                                List.of(scientist1),
+                                false),
+                        true);
+
+                check("Accepted mission starts IN_PROGRESS",
+                        normalMission.getStatus() == MissionStatus.IN_PROGRESS,
+                        true);
+
+                check("Assigned scientist is unavailable",
+                        scientist1.isAvailable(), false);
+
+
+                System.out.println("\n===== 11. ONE ACTIVE NORMAL MISSION =====");
+
+                BaseMission secondNormalMission = simpleMission(
+                        101,
+                        "Second Exploration",
+                        EnumSet.of(Capability.REPAIR),
+                        3);
+
+                check("Second normal mission is rejected while first is active",
+                        colony.startMission(
+                                secondNormalMission,
+                                List.of(engineer1),
+                                false),
+                        false);
+
+                check("Rejected mission becomes FAILED",
+                        secondNormalMission.getStatus() == MissionStatus.FAILED,
+                        true);
+
+                check("Rejected mission has a failure reason",
+                        secondNormalMission.getFailureReason() != null
+                                && !secondNormalMission.getFailureReason().isBlank(),
+                        true);
+
+
+                System.out.println("\n===== 12. EMERGENCY MISSION EXCEPTION =====");
+
+                BaseMission emergencyMission = simpleMission(
+                        102,
+                        "Medical Emergency",
+                        EnumSet.of(Capability.MEDICAL),
+                        2);
+
+                check("Emergency mission can start while normal mission is active",
+                        colony.startMission(
+                                emergencyMission,
+                                List.of(doctor1),
+                                true),
+                        true);
+
+                check("Normal mission remains IN_PROGRESS",
+                        normalMission.getStatus() == MissionStatus.IN_PROGRESS,
+                        true);
+
+                check("Emergency mission starts IN_PROGRESS",
+                        emergencyMission.getStatus() == MissionStatus.IN_PROGRESS,
+                        true);
+
+
+                System.out.println("\n===== 13. UNSUITABLE AGENT =====");
+
+                BaseMission unsuitableMission = simpleMission(
+                        103,
+                        "Repair Mission",
+                        EnumSet.of(Capability.REPAIR),
+                        2);
+
+                // Scientist does not have REPAIR capability.
+                // Use a separate colony because the first normal mission is active.
+                Colony unsuitableColony = new Colony();
+                unsuitableColony.addAgent(scientist1);
+
+                check("Unsuitable agent is rejected",
+                        unsuitableColony.startMission(
+                                unsuitableMission,
+                                List.of(scientist1),
+                                false),
+                        false);
+
+                check("Unsuitable mission becomes FAILED",
+                        unsuitableMission.getStatus() == MissionStatus.FAILED,
+                        true);
+
+
+                System.out.println("\n===== 14. AGENT NOT BELONGING TO COLONY =====");
+
+                Colony ownershipColony = new Colony();
+
+                BaseMission ownershipMission = simpleMission(
+                        104,
+                        "Ownership Test",
+                        EnumSet.of(Capability.EXPLORE),
+                        2);
+
+                check("Agent outside colony is rejected",
+                        ownershipColony.startMission(
+                                ownershipMission,
+                                List.of(scientist1),
+                                false),
+                        false);
+
+
+                System.out.println("\n===== 15. DUPLICATE AGENT TEST =====");
+
+                Colony duplicateColony = new Colony();
+                duplicateColony.addAgent(engineer1);
+
+                BaseMission duplicateMission = simpleMission(
+                        105,
+                        "Duplicate Agent Test",
+                        EnumSet.of(Capability.REPAIR),
+                        2);
+
+                check("Same agent cannot be selected twice",
+                        duplicateColony.startMission(
+                                duplicateMission,
+                                List.of(engineer1, engineer1),
+                                false),
+                        false);
+
+
+                System.out.println("\n===== 16. UNAVAILABLE AGENT TEST =====");
+
+                Colony unavailableColony = new Colony();
+                unavailableColony.addAgent(engineer1);
+
+                engineer1.assign();
+
+                BaseMission unavailableMission = simpleMission(
+                        106,
+                        "Unavailable Agent Test",
+                        EnumSet.of(Capability.REPAIR),
+                        2);
+
+                check("Unavailable agent is rejected",
+                        unavailableColony.startMission(
+                                unavailableMission,
+                                List.of(engineer1),
+                                false),
+                        false);
+
+                engineer1.release();
+
+
+                // =====================================================
+                // SECTION 6: RESOURCES AND EQUIPMENT
+                // =====================================================
+
+                System.out.println("\n===== 17. SECTION 6: RESOURCE TESTS =====");
+
+                Habitat resourceHabitat = new Habitat(
+                        "Resource Habitat", "Area A", 10, true);
+
+                resourceHabitat.addResource(ResourceType.OXYGEN, 10);
+
+                Colony resourceColony = new Colony();
+                resourceColony.addFacility(resourceHabitat);
+                resourceColony.addAgent(engineer1);
+
+                EnumMap<ResourceType, Integer> requiredResources =
+                        new EnumMap<>(ResourceType.class);
+
+                requiredResources.put(ResourceType.OXYGEN, 5);
+
+                BaseMission resourceMission = createMission(
+                        107,
+                        "Resource Mission",
+                        MissionType.REPAIR,
+                        2,
+                        EnumSet.of(Capability.REPAIR),
+                        EnumSet.noneOf(Skill.class),
+                        0,
+                        requiredResources,
+                        List.of());
+
+                check("Mission with sufficient resources is accepted",
+                        resourceColony.startMission(
+                                resourceMission,
+                                List.of(engineer1),
+                                false),
+                        true);
+
+                check("Required oxygen is consumed",
+                        resourceHabitat.getResourceAmount(ResourceType.OXYGEN) == 5,
+                        true);
+
+
+                System.out.println("\n===== 18. INSUFFICIENT RESOURCES =====");
+
+                Habitat poorHabitat = new Habitat(
+                        "Poor Habitat", "Area B", 10, true);
+
+                poorHabitat.addResource(ResourceType.OXYGEN, 2);
+
+                Colony poorColony = new Colony();
+                poorColony.addFacility(poorHabitat);
+                poorColony.addAgent(engineer1);
+
+                BaseMission expensiveMission = createMission(
+                        108,
+                        "Expensive Mission",
+                        MissionType.REPAIR,
+                        2,
+                        EnumSet.of(Capability.REPAIR),
+                        EnumSet.noneOf(Skill.class),
+                        0,
+                        requiredResources,
+                        List.of());
+
+                check("Mission without sufficient resources is rejected",
+                        poorColony.startMission(
+                                expensiveMission,
+                                List.of(engineer1),
+                                false),
+                        false);
+
+                check("Insufficient resources are not consumed",
+                        poorHabitat.getResourceAmount(ResourceType.OXYGEN) == 2,
+                        true);
+
+                check("Insufficient-resource mission becomes FAILED",
+                        expensiveMission.getStatus() == MissionStatus.FAILED,
+                        true);
+
+
+                System.out.println("\n===== 19. EQUIPMENT TESTS =====");
+
+                Equipment drill = new Equipment("Drill", true);
+
+
+                Habitat equipmentHabitat = new Habitat(
+                        "Equipment Habitat", "Area C", 10, true);
+
+                Engineer equipmentEngineer = new Engineer(
+                        32, "Equipment Engineer", equipmentHabitat,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                equipmentHabitat.addEquipment(drill);
+
+                Colony equipmentColony = new Colony();
+                equipmentColony.addFacility(equipmentHabitat);
+                equipmentColony.addAgent(equipmentEngineer);
+
+                BaseMission equipmentMission = createMission(
+                        109,
+                        "Equipment Mission",
+                        MissionType.REPAIR,
+                        2,
+                        EnumSet.of(Capability.REPAIR),
+                        EnumSet.noneOf(Skill.class),
+                        0,
+                        new EnumMap<>(ResourceType.class),
+                        List.of(new Equipment("Drill", true)));
+
+                check("Mission with available equipment is accepted",
+                        equipmentColony.startMission(
+                                equipmentMission,
+                                List.of(equipmentEngineer),
+                                false),
+                        true);
+
+                // Test missing equipment in a separate colony.
+                Colony missingEquipmentColony = new Colony();
+                Engineer missingEquipmentEngineer = new Engineer(
+                        33, "Missing Equipment Engineer", equipmentHabitat,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                missingEquipmentColony.addAgent(missingEquipmentEngineer);
+
+                BaseMission missingEquipmentMission = createMission(
+                        110,
+                        "Missing Equipment Mission",
+                        MissionType.REPAIR,
+                        2,
+                        EnumSet.of(Capability.REPAIR),
+                        EnumSet.noneOf(Skill.class),
+                        0,
+                        new EnumMap<>(ResourceType.class),
+                        List.of(new Equipment("Missing Drill", true)));
+
+                check("Mission with missing equipment is rejected",
+                        missingEquipmentColony.startMission(
+                                missingEquipmentMission,
+                                List.of(missingEquipmentEngineer),
+                                false),
+                        false);
+
+
+                // =====================================================
+                // SECTION 6: MULTIPLE AGENTS
+                // =====================================================
+
+                System.out.println("\n===== 20. SECTION 6: MULTIPLE AGENTS =====");
+
+                Colony teamColony = new Colony();
+
+                Scientist teamScientist = new Scientist(
+                        20, "Team Scientist", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                Engineer teamEngineer = new Engineer(
+                        21, "Team Engineer", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                teamColony.addAgent(teamScientist);
+                teamColony.addAgent(teamEngineer);
+
+                BaseMission teamMission = simpleMission(
+                        111,
+                        "Combined Team Mission",
+                        EnumSet.of(Capability.RESEARCH, Capability.REPAIR),
+                        2);
+
+                check("Two agents collectively cover mission capabilities",
+                        teamColony.startMission(
+                                teamMission,
+                                List.of(teamScientist, teamEngineer),
+                                false),
+                        true);
+
+                check("Both agents become unavailable during mission",
+                        !teamScientist.isAvailable()
+                                && !teamEngineer.isAvailable(),
+                        true);
+
+
+                // =====================================================
+                // SECTION 7: MISSION EXECUTION
+                // =====================================================
+
+                System.out.println("\n===== 21. SECTION 7: MISSION TIME =====");
+
+                Colony timeColony = new Colony();
+
+                Scientist timeScientist = new Scientist(
+                        30, "Time Scientist", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                timeColony.addAgent(timeScientist);
+
+                BaseMission timedMission = simpleMission(
+                        112,
+                        "Timed Mission",
+                        EnumSet.of(Capability.EXPLORE),
+                        3);
+
+                check("Timed mission starts successfully",
+                        timeColony.startMission(
+                                timedMission,
+                                List.of(timeScientist),
+                                false),
+                        true);
+
+                check("Mission initially has zero elapsed time",
+                        timedMission.getElapsedTime() == 0,
+                        true);
+
+                timeColony.advanceTime(1);
+
+                check("Mission advances by one time unit",
+                        timedMission.getElapsedTime() == 1,
+                        true);
+
+                check("Mission is still IN_PROGRESS before duration",
+                        timedMission.getStatus() == MissionStatus.IN_PROGRESS,
+                        true);
+
+                timeColony.advanceTime(2);
+
+                check("Mission completes after reaching its duration",
+                        timedMission.getStatus() == MissionStatus.COMPLETED,
+                        true);
+
+                check("Agent is released after mission completion",
+                        timeScientist.isAvailable(),
+                        true);
+
+                check("Completed mission appears in completed missions",
+                        timeColony.getCompletedMissions().contains(timedMission),
+                        true);
+
+
+                System.out.println("\n===== 22. SECTION 7: MISSION FAILURE =====");
+
+                Colony failureColony = new Colony();
+
+                Engineer failureEngineer = new Engineer(
+                        31, "Failure Engineer", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                failureColony.addAgent(failureEngineer);
+
+                BaseMission failureMission = simpleMission(
+                        113,
+                        "Mission That Fails",
+                        EnumSet.of(Capability.REPAIR),
+                        5);
+
+                check("Mission starts before failure",
+                        failureColony.startMission(
+                                failureMission,
+                                List.of(failureEngineer),
+                                false),
+                        true);
+
+                failureMission.fail("Equipment failed during execution.");
+
+                check("Mission status becomes FAILED",
+                        failureMission.getStatus() == MissionStatus.FAILED,
+                        true);
+
+                check("Failure reason is recorded",
+                        failureMission.getFailureReason() != null
+                                && !failureMission.getFailureReason().isBlank(),
+                        true);
+
+                check("Agent is released after mission failure",
+                        failureEngineer.isAvailable(),
+                        true);
+
+
+                System.out.println("\n===== 23. SECTION 7: FAILED MISSION CANNOT RETRY =====");
+
+                check("Failed mission cannot be started again",
+                        failureColony.startMission(
+                                failureMission,
+                                List.of(failureEngineer),
+                                false),
+                        false);
+
+
+                System.out.println("\n===== 24. SECTION 7: INVALID TIME =====");
+
+                boolean invalidTimeRejected = false;
+
+                try {
+                        failureColony.advanceTime(0);
+                } catch (IllegalArgumentException ex) {
+                        invalidTimeRejected = true;
+                }
+
+                check("Zero time advancement is rejected",
+                        invalidTimeRejected,
+                        true);
+
+
+                // =====================================================
+                // MISSION TRACKING TEST
+                // =====================================================
+
+                System.out.println("\n===== 25. MISSION TRACKING =====");
+
+                check("Accepted mission is registered",
+                        timeColony.getMissions().contains(timedMission),
+                        true);
+
+                check("Completed mission is tracked",
+                        timeColony.getCompletedMissions().contains(timedMission),
+                        true);
+
+                check("Rejected mission is tracked as failed",
+                        unsuitableColony.getFailedMissions().contains(unsuitableMission),
+                        true);
+
+
+                // =====================================================
+                // SECTION 8: ENVIRONMENT TESTS
+                // NOTE: assumes Colony has setEnvironmentCondition(EnvironmentCondition).
+                // If your method has another name, replace it in this section only.
+                // =====================================================
+
+                System.out.println("\n===== 26. ENVIRONMENT: DUST STORM BLOCKS EXPLORATION =====");
+
+                Colony dustColony = new Colony();
+
+                Scientist dustScientist = new Scientist(
+                        40, "Dust Scientist", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                dustColony.addAgent(dustScientist);
+                dustColony.setEnvironmentCondition(EnvironmentCondition.DUST);
+
+                BaseMission dustExploration = simpleMission(
+                        200,
+                        "Exploration During Dust Storm",
+                        EnumSet.of(Capability.EXPLORE),
+                        3);
+
+                check("Exploration mission is rejected during a dust storm",
+                        dustColony.startMission(
+                                dustExploration,
+                                List.of(dustScientist),
+                                false),
+                        false);
+
+                check("Rejected exploration mission becomes FAILED",
+                        dustExploration.getStatus() == MissionStatus.FAILED,
+                        true);
+
+                check("Failure reason names the dust storm",
+                        "Surface operations are not allowed during a dust storm."
+                                .equals(dustExploration.getFailureReason()),
+                        true);
+
+                check("Rejected mission never becomes the active mission",
+                        dustColony.getActiveNormalMission() == null,
+                        true);
+
+                check("Agent stays available after environmental rejection",
+                        dustScientist.isAvailable(),
+                        true);
+
+
+                System.out.println("\n===== 27. ENVIRONMENT: NORMAL CONDITIONS ALLOW EXPLORATION =====");
+
+                dustColony.setEnvironmentCondition(EnvironmentCondition.NORMAL);
+
+                BaseMission afterStorm = simpleMission(
+                        201,
+                        "Exploration After Storm",
+                        EnumSet.of(Capability.EXPLORE),
+                        3);
+
+                check("Exploration mission is accepted once conditions are NORMAL",
+                        dustColony.startMission(
+                                afterStorm,
+                                List.of(dustScientist),
+                                false),
+                        true);
+
+
+                System.out.println("\n===== 28. ENVIRONMENT: DUST STORM FAILS A RUNNING MISSION =====");
+
+                Colony runningColony = new Colony();
+
+                Scientist runningScientist = new Scientist(
+                        41, "Running Scientist", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                runningColony.addAgent(runningScientist);
+
+                BaseMission runningExploration = simpleMission(
+                        202,
+                        "Exploration Caught In Storm",
+                        EnumSet.of(Capability.EXPLORE),
+                        5);
+
+                check("Exploration mission starts under NORMAL conditions",
+                        runningColony.startMission(
+                                runningExploration,
+                                List.of(runningScientist),
+                                false),
+                        true);
+
+                runningColony.setEnvironmentCondition(EnvironmentCondition.DUST);
+
+                check("Running exploration mission FAILS when a dust storm starts",
+                        runningExploration.getStatus() == MissionStatus.FAILED,
+                        true);
+
+                check("Storm failure reason is recorded",
+                        runningExploration.getFailureReason() != null
+                                && !runningExploration.getFailureReason().isBlank(),
+                        true);
+
+                check("Agent is released after the storm failure",
+                        runningScientist.isAvailable(),
+                        true);
+
+                check("Normal-mission slot is freed after the storm failure",
+                        runningColony.getActiveNormalMission() == null,
+                        true);
+
+
+                System.out.println("\n===== 29. ENVIRONMENT: DUST STORM DOES NOT AFFECT REPAIR =====");
+
+                Colony repairColony = new Colony();
+
+                Engineer repairEngineer = new Engineer(
+                        42, "Repair Engineer", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                repairColony.addAgent(repairEngineer);
+                repairColony.setEnvironmentCondition(EnvironmentCondition.DUST);
+
+                BaseMission repairUnderDust = createMission(
+                        203,
+                        "Repair During Dust Storm",
+                        MissionType.REPAIR,
+                        3,
+                        EnumSet.of(Capability.REPAIR),
+                        EnumSet.noneOf(Skill.class),
+                        0,
+                        new EnumMap<>(ResourceType.class),
+                        List.of());
+
+                check("Repair mission is not blocked by a dust storm",
+                        repairColony.startMission(
+                                repairUnderDust,
+                                List.of(repairEngineer),
+                                false),
+                        true);
+
+                Colony steadyColony = new Colony();
+
+                Engineer steadyEngineer = new Engineer(
+                        43, "Steady Engineer", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                steadyColony.addAgent(steadyEngineer);
+
+                BaseMission steadyRepair = createMission(
+                        204,
+                        "Repair Running Through Storm",
+                        MissionType.REPAIR,
+                        5,
+                        EnumSet.of(Capability.REPAIR),
+                        EnumSet.noneOf(Skill.class),
+                        0,
+                        new EnumMap<>(ResourceType.class),
+                        List.of());
+
+                steadyColony.startMission(
+                        steadyRepair,
+                        List.of(steadyEngineer),
+                        false);
+
+                steadyColony.setEnvironmentCondition(EnvironmentCondition.DUST);
+
+                check("Running repair mission survives a dust storm",
+                        steadyRepair.getStatus() == MissionStatus.IN_PROGRESS,
+                        true);
+
+
+                System.out.println("\n===== 30. ENVIRONMENT: COMMUNICATION DISRUPTION =====");
+
+                Colony commColony = new Colony();
+
+                Drone commDrone = new Drone(
+                        44, "Comm Drone", habitatA, 90);
+
+                Rover commRover = new Rover(
+                        45, "Comm Rover", habitatA, 90);
+
+                Engineer commEngineer = new Engineer(
+                        46, "Comm Engineer", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                commColony.addAgent(commDrone);
+                commColony.addAgent(commRover);
+                commColony.addAgent(commEngineer);
+
+                commColony.setEnvironmentCondition(
+                        EnvironmentCondition.COMMUNICATION_DISRUPTION);
+
+                BaseMission droneMission = simpleMission(
+                        205,
+                        "Drone Survey",
+                        EnumSet.of(Capability.AERIAL_RECON),
+                        3);
+
+                check("Drone mission is rejected during communication disruption",
+                        commColony.startMission(
+                                droneMission,
+                                List.of(commDrone),
+                                false),
+                        false);
+
+                check("Rejected drone mission becomes FAILED",
+                        droneMission.getStatus() == MissionStatus.FAILED,
+                        true);
+
+                BaseMission rescueMission = createMission(
+                        206,
+                        "Rescue Mission",
+                        MissionType.RESCUE,
+                        3,
+                        EnumSet.of(Capability.RESCUE),
+                        EnumSet.noneOf(Skill.class),
+                        0,
+                        new EnumMap<>(ResourceType.class),
+                        List.of());
+
+                check("Rescue mission is rejected during communication disruption",
+                        commColony.startMission(
+                                rescueMission,
+                                List.of(commRover),
+                                false),
+                        false);
+
+                BaseMission commRepair = createMission(
+                        207,
+                        "Repair During Communication Disruption",
+                        MissionType.REPAIR,
+                        3,
+                        EnumSet.of(Capability.REPAIR),
+                        EnumSet.noneOf(Skill.class),
+                        0,
+                        new EnumMap<>(ResourceType.class),
+                        List.of());
+
+                check("Repair mission is not blocked by communication disruption",
+                        commColony.startMission(
+                                commRepair,
+                                List.of(commEngineer),
+                                false),
+                        true);
+
+
+                System.out.println("\n===== 31. ENVIRONMENT: AGENT CONTROL RULES =====");
+
+                Environment environment = new Environment();
+
+                check("New environment starts under NORMAL conditions",
+                        environment.getCurrentCondition() == EnvironmentCondition.NORMAL,
+                        true);
+
+                environment.setCondition(EnvironmentCondition.COMMUNICATION_DISRUPTION);
+
+                check("Drone cannot be controlled during communication disruption",
+                        environment.canOperateAgent(commDrone),
+                        false);
+
+                check("Rover can still be operated during communication disruption",
+                        environment.canOperateAgent(commRover),
+                        true);
+
+                environment.setCondition(EnvironmentCondition.NORMAL);
+
+                check("Drone can be controlled again under NORMAL conditions",
+                        environment.canOperateAgent(commDrone),
+                        true);
+
+                boolean nullConditionRejected = false;
+
+                try {
+                        environment.setCondition(null);
+                } catch (IllegalArgumentException ex) {
+                        nullConditionRejected = true;
+                }
+
+                check("Null environmental condition is rejected",
+                        nullConditionRejected,
+                        true);
+
+
+                // =====================================================
+                // SECTION 10: SIMULATION AND TIME MANAGEMENT
+                // =====================================================
+
+                System.out.println("\n===== 32. SIMULATION: CLOCK =====");
+
+                Colony clockColony = new Colony();
+                Simulation clockSim = new Simulation(clockColony);
+
+                check("Simulation exposes its colony",
+                        clockSim.getColony() == clockColony,
+                        true);
+
+                check("New simulation starts at cycle 0",
+                        clockSim.getCurrentCycle() == 0,
+                        true);
+
+                clockSim.advanceTime(3);
+
+                check("Clock advances by the requested units",
+                        clockSim.getCurrentCycle() == 3,
+                        true);
+
+                clockSim.advanceTime(2);
+
+                check("Clock accumulates across calls",
+                        clockSim.getCurrentCycle() == 5,
+                        true);
+
+                boolean zeroTimeRejected = false;
+                try {
+                        clockSim.advanceTime(0);
+                } catch (IllegalArgumentException ex) {
+                        zeroTimeRejected = true;
+                }
+
+                check("Zero time units are rejected",
+                        zeroTimeRejected,
+                        true);
+
+                boolean negativeTimeRejected = false;
+                try {
+                        clockSim.advanceTime(-1);
+                } catch (IllegalArgumentException ex) {
+                        negativeTimeRejected = true;
+                }
+
+                check("Negative time units are rejected",
+                        negativeTimeRejected,
+                        true);
+
+                check("Rejected time does not move the clock",
+                        clockSim.getCurrentCycle() == 5,
+                        true);
+
+                boolean nullColonyRejected = false;
+                try {
+                        new Simulation(null);
+                } catch (IllegalArgumentException ex) {
+                        nullColonyRejected = true;
+                }
+
+                check("Simulation without a colony is rejected",
+                        nullColonyRejected,
+                        true);
+
+
+                System.out.println("\n===== 33. SIMULATION: TIME AFFECTS ONLY WORKING AGENTS =====");
+
+                Colony wearColony = new Colony();
+
+                Scientist workingScientist = new Scientist(
+                        50, "Working Scientist", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                Rover workingRover = new Rover(
+                        51, "Working Rover", habitatA, 100);
+
+                Scientist idleScientist = new Scientist(
+                        52, "Idle Scientist", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                Rover idleRover = new Rover(
+                        53, "Idle Rover", habitatA, 100);
+
+                wearColony.addAgent(workingScientist);
+                wearColony.addAgent(workingRover);
+                wearColony.addAgent(idleScientist);
+                wearColony.addAgent(idleRover);
+
+                BaseMission wearMission = simpleMission(
+                        300,
+                        "Long Exploration",
+                        EnumSet.of(Capability.EXPLORE),
+                        10);
+
+                check("Wear mission starts",
+                        wearColony.startMission(
+                                wearMission,
+                                List.of(workingScientist, workingRover),
+                                false),
+                        true);
+
+                Simulation wearSim = new Simulation(wearColony);
+                wearSim.advanceTime(2);
+
+                check("Mission progresses by the elapsed time",
+                        wearMission.getElapsedTime() == 2,
+                        true);
+
+                check("Mission is still IN_PROGRESS before its duration",
+                        wearMission.getStatus() == MissionStatus.IN_PROGRESS,
+                        true);
+
+                check("Working human gains fatigue",
+                        workingScientist.getFatigueLevel()
+                                == 2 * Human.FATIGUE_PER_TIME_UNIT,
+                        true);
+
+                check("Working robot loses battery",
+                        workingRover.getBatteryLevel()
+                                == 100 - 2 * Robot.BATTERY_DRAIN_PER_TIME_UNIT,
+                        true);
+
+                check("Idle human gains no fatigue",
+                        idleScientist.getFatigueLevel() == 0,
+                        true);
+
+                check("Idle robot keeps its battery",
+                        idleRover.getBatteryLevel() == 100,
+                        true);
+
+
+                System.out.println("\n===== 34. SIMULATION: ROBOT RUNS OUT OF BATTERY =====");
+
+                Colony batteryColony = new Colony();
+
+                Scientist batteryScientist = new Scientist(
+                        54, "Battery Scientist", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                Rover weakRover = new Rover(
+                        55, "Weak Rover", habitatA, 25);
+
+                batteryColony.addAgent(batteryScientist);
+                batteryColony.addAgent(weakRover);
+
+                BaseMission batteryMission = simpleMission(
+                        301,
+                        "Mission With Weak Rover",
+                        EnumSet.of(Capability.EXPLORE),
+                        10);
+
+                batteryColony.startMission(
+                        batteryMission,
+                        List.of(batteryScientist, weakRover),
+                        false);
+
+                Simulation batterySim = new Simulation(batteryColony);
+
+                // 3 units drain 30%, which is more than the 25% available.
+                batterySim.advanceTime(3);
+
+                check("Battery never goes below zero",
+                        weakRover.getBatteryLevel() == 0,
+                        true);
+
+                check("Mission FAILS when a robot becomes unusable",
+                        batteryMission.getStatus() == MissionStatus.FAILED,
+                        true);
+
+                check("Battery failure reason is recorded",
+                        batteryMission.getFailureReason() != null
+                                && !batteryMission.getFailureReason().isBlank(),
+                        true);
+
+                check("Other agents are released after the failure",
+                        batteryScientist.isAvailable(),
+                        true);
+
+                check("Failed mission is tracked as failed",
+                        batteryColony.getFailedMissions().contains(batteryMission),
+                        true);
+
+                check("Normal-mission slot is freed after the failure",
+                        batteryColony.getActiveNormalMission() == null,
+                        true);
+
+
+                System.out.println("\n===== 35. SIMULATION: HUMAN BECOMES EXHAUSTED =====");
+
+                Colony fatigueColony = new Colony();
+
+                // One time unit before the limit is still usable, the next is not.
+                Scientist tiredScientist = new Scientist(
+                        56, "Tired Scientist", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class),
+                        Human.FATIGUE_LIMIT - 2 * Human.FATIGUE_PER_TIME_UNIT);
+
+                fatigueColony.addAgent(tiredScientist);
+
+                BaseMission fatigueMission = simpleMission(
+                        302,
+                        "Mission With Tired Scientist",
+                        EnumSet.of(Capability.EXPLORE),
+                        10);
+
+                fatigueColony.startMission(
+                        fatigueMission,
+                        List.of(tiredScientist),
+                        false);
+
+                Simulation fatigueSim = new Simulation(fatigueColony);
+
+                fatigueSim.advanceTime(1);
+
+                check("Human below the fatigue limit keeps working",
+                        fatigueMission.getStatus() == MissionStatus.IN_PROGRESS,
+                        true);
+
+                fatigueSim.advanceTime(1);
+
+                check("Mission FAILS when a human reaches the fatigue limit",
+                        fatigueMission.getStatus() == MissionStatus.FAILED,
+                        true);
+
+                check("Exhausted human is not available",
+                        tiredScientist.isAvailable(),
+                        false);
+
+
+                System.out.println("\n===== 36. SIMULATION: EMERGENCY MISSION AGENTS ALSO TIRE =====");
+
+                Colony emergencyColony = new Colony();
+
+                Scientist normalWorker = new Scientist(
+                        57, "Normal Worker", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                MedicalOfficer emergencyDoctor = new MedicalOfficer(
+                        58, "Emergency Doctor", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                emergencyColony.addAgent(normalWorker);
+                emergencyColony.addAgent(emergencyDoctor);
+
+                emergencyColony.startMission(
+                        simpleMission(
+                                303,
+                                "Normal Exploration",
+                                EnumSet.of(Capability.EXPLORE),
+                                10),
+                        List.of(normalWorker),
+                        false);
+
+                emergencyColony.startMission(
+                        simpleMission(
+                                304,
+                                "Emergency Treatment",
+                                EnumSet.of(Capability.MEDICAL),
+                                10),
+                        List.of(emergencyDoctor),
+                        true);
+
+                new Simulation(emergencyColony).advanceTime(1);
+
+                check("Normal-mission human gains fatigue",
+                        normalWorker.getFatigueLevel() == Human.FATIGUE_PER_TIME_UNIT,
+                        true);
+
+                check("Emergency-mission human also gains fatigue",
+                        emergencyDoctor.getFatigueLevel() == Human.FATIGUE_PER_TIME_UNIT,
+                        true);
+
+
+                System.out.println("\n===== 37. SIMULATION: COMPLETION RELEASES AGENTS =====");
+
+                Colony finishColony = new Colony();
+
+                Scientist finishScientist = new Scientist(
+                        59, "Finish Scientist", habitatA,
+                        HealthStatus.HEALTHY,
+                        EnumSet.noneOf(Skill.class), 0);
+
+                finishColony.addAgent(finishScientist);
+
+                BaseMission finishMission = simpleMission(
+                        305,
+                        "Short Mission",
+                        EnumSet.of(Capability.EXPLORE),
+                        3);
+
+                finishColony.startMission(
+                        finishMission,
+                        List.of(finishScientist),
+                        false);
+
+                Simulation finishSim = new Simulation(finishColony);
+                finishSim.advanceTime(3);
+
+                check("Mission COMPLETES when its duration is reached",
+                        finishMission.getStatus() == MissionStatus.COMPLETED,
+                        true);
+
+                check("Agent worked for the whole duration (fatigue applied)",
+                        finishScientist.getFatigueLevel()
+                                == 3 * Human.FATIGUE_PER_TIME_UNIT,
+                        true);
+
+                check("Agent is released after completion",
+                        finishScientist.isAvailable(),
+                        true);
+
+                int fatigueAfterCompletion = finishScientist.getFatigueLevel();
+
+                finishSim.advanceTime(1);
+
+                check("Released agent no longer tires as time passes",
+                        finishScientist.getFatigueLevel() == fatigueAfterCompletion,
+                        true);
+
+
+                System.out.println("\n==============================");
+
+                System.out.println(
+                        failures == 0
+                                ? "ALL CHECKS PASSED"
+                                : "FAILURES: " + failures);
+
+                System.out.println("==============================\n");
+
+                if (failures > 0) {
+                        System.err.println("Tests completed with " + failures + " failure(s).");
+                        System.exit(1);
+                } else {
+                        System.out.println("All 37 unit test suites passed successfully!");
+                }
+        }
+}
