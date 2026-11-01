@@ -52,8 +52,6 @@ public interface Agent {
     boolean isHuman ();
     boolean isRobot();
 
-    void setAvailability(boolean b);
-
     // Advance time for this agent (humans get tired, robots consume battery).
     void advanceTime(int units);
 }
