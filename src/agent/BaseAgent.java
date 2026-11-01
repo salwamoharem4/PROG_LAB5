@@ -81,12 +81,6 @@ public abstract class BaseAgent implements Agent {
         return available && isUsable();
     }
 
-    // Kept from your version (used by emergency code to free responders).
-    @Override
-    public void setAvailability(boolean available) {
-        this.available = available;
-    }
-
     // Assign the agent to a mission.
     @Override
     public void assign() {

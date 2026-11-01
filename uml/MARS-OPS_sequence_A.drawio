@@ -1,4 +1,4 @@
-<mxfile host="drawio-plugin" modified="2026-11-01T07:23:28.339Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36" version="22.1.22" etag="G3Rsb5Mjh2xiSLmaLTSu" type="embed" pages="3">
+<mxfile host="drawio-plugin" modified="2026-11-01T07:44:16.128Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36" version="22.1.22" etag="Ca0-nvh6LWET6RLDr8l3" type="embed" pages="3">
   <diagram name="A - Mission submission and execution" id="seq1">
     <mxGraphModel dx="2084" dy="1090" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1689" pageHeight="2044" math="0" shadow="0">
       <root>
@@ -345,7 +345,7 @@
     </mxGraphModel>
   </diagram>
   <diagram name="B - Oxygen leak emergency" id="seq2">
-    <mxGraphModel dx="1042" dy="545" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1360" pageHeight="1412" math="0" shadow="0">
+    <mxGraphModel dx="1895" dy="991" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1360" pageHeight="1412" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -588,7 +588,7 @@
     </mxGraphModel>
   </diagram>
   <diagram name="C - Environmental restriction" id="seq3">
-    <mxGraphModel dx="1226" dy="641" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1240" pageHeight="852" math="0" shadow="0">
+    <mxGraphModel dx="1226" dy="641" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1240" pageHeight="852" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />

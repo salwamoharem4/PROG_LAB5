@@ -53,7 +53,7 @@ public abstract class Emergency {
 
         this.dispatchedResponders.add(agent);
         agent.moveTo(getEmergencylocation());
-        agent.setAvailability(false);
+        agent.assign();
 
     }
     public List<BaseAgent> getDispatchedResponders() {
@@ -63,7 +63,7 @@ public abstract class Emergency {
     public void releaseResponders(){
 
         for (BaseAgent agent : dispatchedResponders){
-            agent.setAvailability(true);
+            agent.release();
         }
 
     }
