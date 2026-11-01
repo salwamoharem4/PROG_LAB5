@@ -4,16 +4,33 @@
 
 MARS-OPS is a Java-based simulation system designed to manage a Mars research colony. It models human personnel, robotic units, facilities, resources, missions, environmental conditions, and emergency situations.
 
-The system demonstrates object-oriented programming concepts, including encapsulation, abstraction, inheritance, polymorphism, and relationships between objects.
+The system demonstrates fundamental Object-Oriented Programming concepts, including encapsulation, abstraction, inheritance, polymorphism, and object relationships.
 
 The project includes five demonstration scenarios covering successful mission execution, mission rejection, resource shortages, emergency handling, and environmental restrictions.
 
-## Project Directory & File Structure
+---
 
-This repository is structured in accordance with the project submission specifications:
+## Table of Contents
+
+1. [System Description and Main Components](#1-system-description--main-components)
+2. [Important Design Decisions and Assumptions](#2-important-design-decisions--assumptions)
+3. [Resource Allocation Rules](#3-resource-allocation-rules)
+4. [Emergency Rules](#4-emergency-rules)
+5. [Environmental Effects](#5-environmental-effects)
+6. [Mission States and Lifecycle](#6-mission-states--lifecycle)
+7. [Additional Implementation Decisions](#7-additional-implementation-decisions)
+8. [Compilation and Execution Instructions](#8-compilation--execution-instructions)
+9. [Required Demonstration Scenarios](#9-required-demonstration-scenarios)
+
+---
+
+## Project Directory and File Structure
+
+The repository is organized according to the project submission specifications.
 
 ```text
 PROG_LAB5/
+│
 ├── .gitignore
 ├── README.md
 │
@@ -28,11 +45,10 @@ PROG_LAB5/
 │   ├── sequence-diagrams.drawio
 │   ├── use-case-diagram.drawio
 │   └── exports/
-│       └── [exported-images-or-pdf]
+│       └── exported-images-or-pdf
 │
-── src/
-├──
- Main.java
+├── src/
+│   ├── Main.java
 │   ├── agent/
 │   │   ├── Agent.java
 │   │   ├── BaseAgent.java
@@ -47,23 +63,28 @@ PROG_LAB5/
 │   │       ├── Rover.java
 │   │       ├── RepairRobot.java
 │   │       └── Drone.java
+│   │
 │   ├── colony/
 │   │   ├── Colony.java
 │   │   └── Simulation.java
+│   │
 │   ├── core/
 │   │   ├── Capability.java
 │   │   ├── Skill.java
 │   │   ├── Location.java
 │   │   ├── Surface.java
 │   │   └── EmergencyType.java
+│   │
 │   ├── environment/
 │   │   ├── Environment.java
 │   │   └── EnvironmentCondition.java
+│   │
 │   ├── emergencies/
 │   │   ├── Emergency.java
 │   │   ├── EmergencyStatus.java
 │   │   ├── OxygenLeak.java
-│   │   ├── Fire.java
+│   │   └── Fire.java
+│   │
 │   ├── facilities/
 │   │   ├── Facility.java
 │   │   ├── Habitat.java
@@ -72,6 +93,7 @@ PROG_LAB5/
 │   │   ├── PowerStation.java
 │   │   ├── CommunicationStation.java
 │   │   └── Equipment.java
+│   │
 │   ├── mission/
 │   │   ├── Mission.java
 │   │   ├── BaseMission.java
@@ -83,50 +105,40 @@ PROG_LAB5/
 │   │       ├── RepairMission.java
 │   │       ├── ResearchMission.java
 │   │       └── RescueMission.java
+│   │
 │   └── resource/
 │       └── ResourceType.java
 │
 └── bin/
-    └── [compiled-classes]
+    └── compiled-classes/
+```
 
-### Directory Details:
+### Directory Details
 
-* **`src/` (Java Source Code):**
-  * Contains all project `.java` source files, including the central driver [`Main.java`](src/Main.java).
-  * Houses all domain models, interfaces, enums, and simulation coordinators.
-  * When compiled, bytecodes are directed to the `bin/` folder.
+| Directory / File | Description |
+|---|---|
+| `src/` | Contains all Java source files and application components. |
+| `uml/` | Contains the five editable UML diagrams and their exported versions. |
+| `docs/` | Contains design assumptions and demonstration scenario documentation. |
+| `bin/` | Stores compiled Java `.class` files and is excluded from version control. |
+| `README.md` | Main project documentation. |
+| `.gitignore` | Specifies files and directories excluded from Git. |
 
-* **`uml/` (UML Design Source Files):**
-  * Stores the editable source diagram files created with diagramming tools (e.g., Draw.io `.drawio` files).
-  * Contains all 5 mandatory UML models:
-    1. **Class Diagram** (`class-diagram.drawio`): Static system architecture and relationships.
-    2. **Object Diagram** (`object-diagram.drawio`): Runtime snapshot of entities, facilities, and missions.
-    3. **State Machine Diagram** (`state-machine-diagram.drawio`): Lifecycle and transitions of missions.
-    4. **Sequence Diagrams** (`sequence-diagrams.drawio`): Collaboration flows for mission execution, emergency handling, and environmental blocks.
-    5. **Use Case Diagram** (`use-case-diagram.drawio`): System boundary, external actors, and use case extensions/inclusions.
+### UML Diagrams
 
-* **`uml/exports/` (Rendered Diagrams):**
-  * Stores high-resolution exported images (`.png`) or `.pdf` versions of each diagram for final review and grading.
+The project includes five UML diagrams:
 
-* **`docs/` (Design Notes & Scenarios):**
-  * `design-assumptions.md`: Working notes detailing object relationship justifications, custom rules, and edge-case assumptions.
-  * `demo-scenarios.md`: Detailed test plans and expected console traces for Scenarios 1 through 5.
+1. **Class Diagram:** Represents the system structure, classes, and relationships.
+2. **Object Diagram:** Shows a runtime snapshot of system objects.
+3. **State Machine Diagram:** Describes mission states and transitions.
+4. **Sequence Diagrams:** Illustrate interactions during mission execution, emergency handling, and environmental restrictions.
+5. **Use Case Diagram:** Represents system actors and their interactions with the system.
 
-* **`bin/` (Compiled Bytecode):**
-  * Output directory where the Java compiler (`javac`) places generated `.class` files.
-  * Kept out of version control via `.gitignore`.
-
-* **`README.md`:**
-  * Master documentation covering architecture, policies, rules, compilation commands, and scenario run instructions.
-
-* **Submission Packaging:**
-  * The entire root folder `StudentID-Prog-II-Lab5/` is compressed into `StudentID-Prog-II-Lab5.zip` for final lab delivery.
-
-
+---
 
 ## 1. System Description & Main Components
 
-The system is divided into several main components:
+The system is divided into several main components.
 
 ### 1.1 Agents
 
@@ -189,7 +201,8 @@ The system includes a mission abstraction and concrete mission types, including:
 
 - Exploration missions.
 - Repair missions.
-- Other mission types implemented in the project.
+- Research missions.
+- Rescue missions.
 
 Missions contain requirements that must be satisfied before execution, such as agent capabilities, skills, equipment, battery power, and resources.
 
@@ -209,7 +222,7 @@ The simulation component advances time and allows active missions to progress un
 
 ## 2. Important Design Decisions & Assumptions
 
-The following decisions describe the project's current implementation and selected design policies.
+The following decisions describe the project's implementation and selected design policies.
 
 ### 2.1 Object-Oriented Design
 
@@ -262,7 +275,7 @@ The current emergency dispatch implementation requires both:
 
 Both must have the capability required by the emergency.
 
-This is a design policy selected for the current implementation, rather than a universal requirement for every possible emergency system.
+This is a design policy selected for the current implementation.
 
 ---
 
@@ -346,9 +359,11 @@ If the response succeeds:
 
 The emergency implementation uses the following statuses:
 
-- `PENDING`: The emergency has been detected but not resolved.
-- `RESOLVED`: The emergency has been successfully handled.
-- `UNRESOLVED`: The emergency response could not be completed.
+| Status | Description |
+|---|---|
+| `PENDING` | The emergency has been detected but not resolved. |
+| `RESOLVED` | The emergency has been successfully handled. |
+| `UNRESOLVED` | The emergency response could not be completed. |
 
 ### 4.4 Responder Availability
 
@@ -382,15 +397,15 @@ When an exploration mission is submitted during a dust storm:
 
 The demonstration output uses the failure reason:
 
-`Surface operations are not allowed during a dust storm.`
+```text
+Surface operations are not allowed during a dust storm.
+```
 
 ### 5.2 Environmental Changes During Execution
 
 When the colony's environmental condition changes, the `setEnvironmentCondition()` method updates the environment and checks registered missions through the environment component.
 
 This allows environmental changes to affect missions that are already active.
-
-The README and UML diagrams should reflect the actual behavior implemented in the environment classes.
 
 ---
 
@@ -409,7 +424,7 @@ The project uses the `MissionStatus` enumeration.
 | `IN_PROGRESS` | Mission execution has started. |
 | `COMPLETED` | Mission has successfully finished. |
 | `FAILED` | Mission could not be completed. |
-| `CANCELLED` | Mission has been cancelled, if supported by the relevant implementation. |
+| `CANCELLED` | Mission has been cancelled, if supported by the implementation. |
 
 ### 6.2 Mission Lifecycle
 
@@ -521,15 +536,7 @@ The colony can generate a status report containing:
 
 The project uses Java features such as collection factories (`List.of()`), which require a modern JDK.
 
-### 8.2 Project Structure
-
-The Java source files are stored under `src/`, organized into packages.
-
-The main class is `Main.java`.
-
-Compiled `.class` files are placed in the `bin/` directory.
-
-### 8.3 Compile the Project
+### 8.2 Compile the Project
 
 Open a terminal in the project root directory.
 
@@ -547,7 +554,7 @@ javac -d bin $(find src -name "*.java")
 
 The `-d bin` option directs compiled classes into the `bin/` directory while preserving their package structure.
 
-### 8.4 Run the Project
+### 8.3 Run the Project
 
 Execute the main class:
 
@@ -557,7 +564,7 @@ java -cp bin Main
 
 The program runs the five demonstration scenarios sequentially and prints their results in the terminal.
 
-### 8.5 Recompile After Changes
+### 8.4 Recompile After Changes
 
 Whenever source files are modified, compile the project again before running it:
 
@@ -572,7 +579,8 @@ java -cp bin Main
 
 The `Main` class executes the five required demonstration scenarios from Section 12 of the project specification.
 
-### Scenario 1: Successful Exploration
+<details>
+<summary><strong>Scenario 1: Successful Exploration</strong></summary>
 
 **Objective:** Demonstrate successful execution of an exploration mission.
 
@@ -584,7 +592,7 @@ The scenario creates:
 - A terrain scanner.
 - An exploration mission with a duration of three cycles.
 
-**Expected behavior:**
+**Expected Behavior:**
 
 - The mission is accepted.
 - The scientist and rover become unavailable while the mission is active.
@@ -593,13 +601,16 @@ The scenario creates:
 - The agents become available again.
 - The scientist's fatigue and rover's battery level are updated.
 
-### Scenario 2: Mission Rejection
+</details>
+
+<details>
+<summary><strong>Scenario 2: Mission Rejection</strong></summary>
 
 **Objective:** Demonstrate that an unsuitable agent cannot be assigned to a mission.
 
 The scenario attempts to assign an exploration mission to an engineer who does not possess the required exploration capability.
 
-**Expected behavior:**
+**Expected Behavior:**
 
 - The mission is rejected.
 - The mission becomes `FAILED`.
@@ -607,13 +618,16 @@ The scenario attempts to assign an exploration mission to an engineer who does n
 - The mission never becomes active.
 - The engineer remains available.
 
-### Scenario 3: Resource Shortage
+</details>
+
+<details>
+<summary><strong>Scenario 3: Resource Shortage</strong></summary>
 
 **Objective:** Demonstrate safe resource handling when the colony does not have enough resources.
 
 The scenario attempts to execute a mission requiring 10 spare parts and 20 battery power when the colony has only 2 spare parts.
 
-**Expected behavior:**
+**Expected Behavior:**
 
 - The mission is rejected.
 - The failure reason identifies insufficient colony resources.
@@ -621,7 +635,10 @@ The scenario attempts to execute a mission requiring 10 spare parts and 20 batte
 - The spare parts balance remains unchanged.
 - Resource quantities never become negative.
 
-### Scenario 4: Emergency Handling
+</details>
+
+<details>
+<summary><strong>Scenario 4: Emergency Handling</strong></summary>
 
 **Objective:** Demonstrate the colony's response to an oxygen leak.
 
@@ -629,7 +646,7 @@ The scenario creates a biodome containing oxygen and spare parts, an engineer, a
 
 An oxygen leak is then triggered.
 
-**Expected behavior:**
+**Expected Behavior:**
 
 - The initial oxygen loss is applied.
 - The emergency is detected as `PENDING`.
@@ -639,13 +656,16 @@ An oxygen leak is then triggered.
 - The responders become available again.
 - The final oxygen quantity reflects the initial loss.
 
-### Scenario 5: Environmental Effect
+</details>
+
+<details>
+<summary><strong>Scenario 5: Environmental Effect</strong></summary>
 
 **Objective:** Demonstrate how environmental conditions affect mission execution.
 
 The scenario changes the colony's environmental condition to `DUST` and attempts to start a surface exploration mission.
 
-**Expected behavior:**
+**Expected Behavior:**
 
 - The environment changes to a dust storm condition.
 - The exploration mission is rejected.
@@ -653,12 +673,30 @@ The scenario changes the colony's environmental condition to `DUST` and attempts
 - The mission does not become active.
 - The agents remain available.
 
+</details>
+
+---
+
+## Documentation
+
+Additional project documentation is available in the repository:
+
+- [Design Assumptions](docs/design-assumptions.md)
+- [Demo Scenarios Guide](docs/demo-scenarios.md)
+- [UML Diagrams](uml/)
+
 ---
 
 ## Conclusion
 
-MARS-OPS demonstrates how object-oriented programming can be used to model and coordinate a complex system.
+MARS-OPS demonstrates how Object-Oriented Programming can be used to model and coordinate a complex system.
 
 Through its agents, facilities, resources, missions, emergencies, and environmental components, the project demonstrates object interaction, state management, validation, resource allocation, and simulation time progression.
 
 The five demonstration scenarios provide practical examples of the system's main functionality and show how the colony responds to both normal operations and unexpected situations.
+
+---
+
+**Project:** MARS-OPS – Autonomous Mars Colony Management & Emergency Simulator  
+**Language:** Java  
+**Academic Context:** Programming II – Fall 2026
